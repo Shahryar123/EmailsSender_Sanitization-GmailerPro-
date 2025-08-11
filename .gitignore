@@ -1,0 +1,5 @@
+.env
+/GmailAPI_Credentials/
+/EmailsInfo/
+Skipped_Emails.txt
+token.json
