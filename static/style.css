@@ -46,7 +46,9 @@ h1 {
     gap: 40px;
     justify-content: center;
     flex-wrap: wrap;
+    align-items: flex-start; /* key to stop vertical stretching */
 }
+
 .card {
     background: white;
     border-radius: 18px;
@@ -54,6 +56,47 @@ h1 {
     flex: 1 1 380px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     text-align: left;
+    height: auto; /* ensures content determines height */
+}
+#date_range {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+    opacity: 0;
+}
+
+#date_range.show {
+    opacity: 1;
+}
+.form-check {
+    margin-bottom: 20px;
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.form-check-input {
+    margin-top: 0.25rem;
+    border: 2px solid #2196F3;
+    border-radius: 4px;
+}
+
+.form-check-input:focus {
+    border-color: #1976D2;
+    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #2196F3;
+    border-color: #2196F3;
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: #495057;
+    cursor: pointer;
 }
 .card .card-icon {
     width: 44px;

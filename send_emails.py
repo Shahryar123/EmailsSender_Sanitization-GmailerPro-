@@ -1,4 +1,4 @@
-def run_email_sender(template_name="Template_02.html"):
+def run_email_sender(template_name="Template_02.html" , allow_duplicates=False):
     import os
     import pandas as pd
     import smtplib
@@ -54,8 +54,11 @@ def run_email_sender(template_name="Template_02.html"):
     latest_csv = max(csv_files, key=lambda f: os.path.getmtime(os.path.join(CSV_FOLDER, f)))
     df = pd.read_csv(os.path.join(CSV_FOLDER, latest_csv))
 
+    # ✅ Remove duplicates if not allowed
+    if not allow_duplicates:
+        df = df.drop_duplicates(subset=['From Email'])
+        
     new_sent_emails = set()
-
     sent_count = 0  # count how many new emails sent
 
     for _, row in df.iterrows():

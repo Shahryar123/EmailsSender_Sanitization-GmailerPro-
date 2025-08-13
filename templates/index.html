@@ -17,59 +17,79 @@
             </svg>
         </div>
 
-    <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">Email Automation</h1>
+        <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">Email Automation</h1>
         <p class="subtitle">Streamline your email campaigns with our advanced automation platform. Generate targeted lists and send beautiful emails effortlessly.</p>
 
-         <div class="cards-row">
-        <!-- Generate CSV Card -->
-        <div class="card generate">
-            <div class="card-icon" aria-hidden="true">
-                <!-- Spreadsheet Icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-filetype-csv" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM3.517 14.841a1.13 1.13 0 0 0 .401.823q.195.162.478.252.284.091.665.091.507 0 .859-.158.354-.158.539-.44.187-.284.187-.656 0-.336-.134-.56a1 1 0 0 0-.375-.357 2 2 0 0 0-.566-.21l-.621-.144a1 1 0 0 1-.404-.176.37.37 0 0 1-.144-.299q0-.234.185-.384.188-.152.512-.152.214 0 .37.068a.6.6 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.1 1.1 0 0 0-.2-.566 1.2 1.2 0 0 0-.5-.41 1.8 1.8 0 0 0-.78-.152q-.439 0-.776.15-.337.149-.527.421-.19.273-.19.639 0 .302.122.524.124.223.352.367.228.143.539.213l.618.144q.31.073.463.193a.39.39 0 0 1 .152.326.5.5 0 0 1-.085.29.56.56 0 0 1-.255.193q-.167.07-.413.07-.175 0-.32-.04a.8.8 0 0 1-.248-.115.58.58 0 0 1-.255-.384zM.806 13.693q0-.373.102-.633a.87.87 0 0 1 .302-.399.8.8 0 0 1 .475-.137q.225 0 .398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.4 1.4 0 0 0-.489-.272 1.8 1.8 0 0 0-.606-.097q-.534 0-.911.223-.375.222-.572.632-.195.41-.196.979v.498q0 .568.193.976.197.407.572.626.375.217.914.217.439 0 .785-.164t.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.8.8 0 0 1-.118.363.7.7 0 0 1-.272.25.9.9 0 0 1-.401.087.85.85 0 0 1-.478-.132.83.83 0 0 1-.299-.392 1.7 1.7 0 0 1-.102-.627zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879z"/>
-                </svg>
-            </div>
-            <h3>Generate CSV</h3>
-            <form method="post" class="mb-0">
-                <label for="num_emails" class="form-label">Number of Emails</label>
-                <select name="num_emails" id="num_emails" class="form-select" aria-label="Number of Emails">
-                    <option value="5" {% if last_num_emails == '5' %}selected{% endif %}>5 Emails</option>
-                    <option value="10" {% if last_num_emails == '10' %}selected{% endif %}>10 Emails</option>
-                    <option value="all" {% if last_num_emails == 'all' %}selected{% endif %}>All Emails</option>
-                </select>
-
-                <button type="submit" name="generate_csv" class="btn btn-generate">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-magic" viewBox="0 0 16 16">
-                    <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/>
+        
+        <div class="cards-row">
+            <!-- Generate CSV Card -->
+            <div class="card generate">
+                <div class="card-icon" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-filetype-csv" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM3.517 14.841a1.13 1.13 0 0 0 .401.823q.195.162.478.252.284.091.665.091.507 0 .859-.158.354-.158.539-.44.187-.284.187-.656 0-.336-.134-.56a1 1 0 0 0-.375-.357 2 2 0 0 0-.566-.21l-.621-.144a1 1 0 0 1-.404-.176.37.37 0 0 1-.144-.299q0-.234.185-.384.188-.152.512-.152.214 0 .37.068a.6.6 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.1 1.1 0 0 0-.2-.566 1.2 1.2 0 0 0-.5-.41 1.8 1.8 0 0 0-.78-.152q-.439 0-.776.15-.337.149-.527.421-.19.273-.19.639 0 .302.122.524.124.223.352.367.228.143.539.213l.618.144q.31.073.463.193a.39.39 0 0 1 .152.326.5.5 0 0 1-.085.29.56.56 0 0 1-.255.193q-.167.07-.413.07-.175 0-.32-.04a.8.8 0 0 1-.248-.115.58.58 0 0 1-.255-.384zM.806 13.693q0-.373.102-.633a.87.87 0 0 1 .302-.399.8.8 0 0 1 .475-.137q.225 0 .398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.4 1.4 0 0 0-.489-.272 1.8 1.8 0 0 0-.606-.097q-.534 0-.911.223-.375.222-.572.632-.195.41-.196.979v.498q0 .568.193.976.197.407.572.626.375.217.914.217.439 0 .785-.164t.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.8.8 0 0 1-.118.363.7.7 0 0 1-.272.25.9.9 0 0 1-.401.087.85.85 0 0 1-.478-.132.83.83 0 0 1-.299-.392 1.7 1.7 0 0 1-.102-.627zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879z"/>
                     </svg>
-                    Generate CSV
-                </button>
-            </form>
-        </div>
+                </div>
+                <h3>Generate CSV</h3>
+                <form method="post" class="mb-0">
+                        <label for="email_option" class="form-label">Select Option</label>
+                        <select name="email_option" id="email_option" class="form-select" aria-label="Select Option">
+                            <option value="all" selected>📨 All Emails</option>
+                            <option value="date">📅 Select Date</option>
+                        </select>
 
-        <!-- Send Emails Card -->
-        <div class="card send">
-            <div class="card-icon" aria-hidden="true">
-                <!-- Send Icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-send-check-fill" viewBox="0 0 16 16">
-                    <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
-                    <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
-                </svg>
+                    <!-- Date inputs (smoothly expand) -->
+                    <div id="date_range">
+                        <div class="mb-3" style="margin-top: 13px;">
+                            <label for="start_date" class="form-label">From Date</label>
+                            <input type="date" name="start_date" id="start_date" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="end_date" class="form-label">To Date</label>
+                            <input type="date" name="end_date" id="end_date" class="form-control">
+                        </div>
+                    </div>
+
+                    <button type="submit" name="generate_csv" class="btn btn-generate">                  
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-magic" viewBox="0 0 16 16">
+                            <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/>
+                        </svg>
+                        Generate CSV
+                    </button>
+                </form>
             </div>
-            <h3>Send Emails</h3>
-            <form method="post" class="mb-0">
-                <input type="hidden" name="num_emails" value="{{ last_num_emails }}">
-                <label for="template_name" class="form-label">Email Template</label>
-                <select name="template_name" id="template_name" class="form-select" aria-label="Email Template">
-                    <option value="Template_01.html">Template 01 - Notification</option>
-                    <option value="Template_02.html" selected>Template 02 - Welcome</option>
-                </select>
-                <button type="submit" name="send_email" class="btn btn-send">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                    Send Emails
-                </button>
-            </form>
-        </div>
+
+            <!-- Send Emails Card -->
+            <div class="card send">
+                <div class="card-icon" aria-hidden="true">
+                    <!-- Send Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-send-check-fill" viewBox="0 0 16 16">
+                        <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
+                        <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                    </svg>
+                </div>
+                <h3>Send Emails</h3>
+                <form method="post" class="mb-0">
+                    <input type="hidden" name="num_emails" value="{{ last_num_emails }}">
+                    <label for="template_name" class="form-label">Email Template</label>
+                    <select name="template_name" id="template_name" class="form-select" aria-label="Email Template">
+                        <option value="Template_01.html">Template 01 - Notification</option>
+                        <option value="Template_02.html" selected>Template 02 - Welcome</option>
+                    </select>
+                    
+                    <!-- Checkbox for duplicate values -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="allow_duplicates" id="allow_duplicates" value="1">
+                        <label class="form-check-label" for="allow_duplicates">
+                            Allow Duplicate Values in CSV
+                        </label>
+                    </div>
+                    <button type="submit" name="send_email" class="btn btn-send">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        Send Emails
+                    </button>
+                </form>
+                
+            </div>
     </div>
 </div>
 
@@ -97,8 +117,38 @@
         }
     });
 </script>
+ <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const emailOption = document.getElementById("email_option");
+            const dateRange = document.getElementById("date_range");
 
+            // Start collapsed
+            dateRange.style.maxHeight = "0";
 
+            emailOption.addEventListener("change", function () {
+                if (this.value === "date") {
+                    // Expanding
+                    dateRange.classList.add("show");
+                    dateRange.style.maxHeight = dateRange.scrollHeight + "px";
+                } else {
+                    // Collapsing - set current height first, then animate to 0
+                    dateRange.style.maxHeight = dateRange.scrollHeight + "px";
+                    // Force reflow
+                    dateRange.offsetHeight;
+                    // Start both animations simultaneously
+                    dateRange.classList.remove("show");
+                    dateRange.style.maxHeight = "0";
+                }
+            });
 
+            // Optional: Reset max-height after transition completes
+            dateRange.addEventListener('transitionend', function() {
+                if (dateRange.classList.contains('show')) {
+                    // When fully expanded, remove max-height constraint for flexibility
+                    dateRange.style.maxHeight = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

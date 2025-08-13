@@ -21,12 +21,38 @@ def parse_from_field(from_field):
         return name.strip(), email.strip()
     return from_field, ""
 
+
+def build_gmail_query(arg_list):
+    """
+    Build Gmail API query based on arguments:
+    - ["all"] → no date filter
+    - ["date", from_date, to_date] → filter by date range
+    """
+    if len(arg_list) > 0 and arg_list[0].lower() == "date":
+        try:
+            from_date = datetime.strptime(arg_list[1], "%Y-%m-%d").strftime("%Y/%m/%d")
+            to_date = datetime.strptime(arg_list[2], "%Y-%m-%d").strftime("%Y/%m/%d")
+            print(f"📌 From Date: {from_date}")
+            print(f"📌 To Date: {to_date}")
+
+            return f"after:{from_date} before:{to_date}"
+        except Exception as e:
+            print(f"❌ Invalid date format. Use YYYY-MM-DD. Error: {e}")
+            sys.exit(1)
+    return ""  # no query means all emails
+
+
 def main():
-    # Get maxResults from CLI arg
+    # Parse CLI args
+    query = ""
     max_results_arg = None
+
     if len(sys.argv) > 1:
         if sys.argv[1].lower() == "all":
-            max_results_arg = None  # Fetch all available (may take time)
+            max_results_arg = None
+        elif sys.argv[1].lower() == "date":
+            query = build_gmail_query(sys.argv[1:])
+            max_results_arg = None  # Gmail will return all in range
         else:
             try:
                 max_results_arg = int(sys.argv[1])
@@ -35,6 +61,7 @@ def main():
     else:
         max_results_arg = 10
 
+    # Auth
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
@@ -51,11 +78,24 @@ def main():
 
     service = build('gmail', 'v1', credentials=creds)
 
-    # List messages
+    # Add Primary category filter to whatever query you already built
+    if query:
+        query = f"category:primary {query}"
+    else:
+        query = "category:primary"
+        
+    print(f"📌 Gmail API Query: {query}")
+    print(f"📌 Max Results: {max_results_arg}")
+
     results = service.users().messages().list(
-        userId='me', maxResults=max_results_arg
+        userId='me',
+        maxResults=max_results_arg,
+        labelIds=['INBOX'],  # Inbox only
+        q=query
     ).execute()
+
     messages = results.get('messages', [])
+
 
     email_data = []
     for msg in messages:
@@ -74,7 +114,6 @@ def main():
 
         from_name, from_email = parse_from_field(from_field)
 
-        # Convert email date to local datetime
         try:
             email_datetime = datetime.strptime(date_field, '%a, %d %b %Y %H:%M:%S %z')
             email_datetime_str = email_datetime.strftime('%Y-%m-%d %H:%M:%S')
@@ -89,14 +128,14 @@ def main():
             'DateTime Received': email_datetime_str
         })
 
+    # Save CSV
     df = pd.DataFrame(email_data)
-
-    # Create filename
     now_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     filename = f"EmailsInfo/GeneratedEmails_{now_str}.csv"
-
     df.to_csv(filename, index=False, encoding='utf-8')
+
     print(f"✅ Saved {filename} with {len(email_data)} emails.")
+
 
 if __name__ == '__main__':
     main()
