@@ -97,6 +97,7 @@ h1 {
     font-weight: 500;
     color: #495057;
     cursor: pointer;
+    font-style: italic;
 }
 .card .card-icon {
     width: 44px;
