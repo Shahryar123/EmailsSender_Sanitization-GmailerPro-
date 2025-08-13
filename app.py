@@ -5,6 +5,14 @@ from send_emails import run_email_sender
 app = Flask(__name__)
 app.secret_key = "super_secret_key"  # Required for session and flash messages
 
+@app.route("/set-account", methods=["POST"])
+def set_account():
+    selected = request.form.get("smtp_account")
+    if selected:
+        session["smtp_account"] = selected
+    return ("", 204)  # No content response
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
@@ -37,8 +45,13 @@ def index():
              # Get checkbox value (True if checked, False if not)
             allow_duplicates = request.form.get("allow_duplicates") == "1"
             
+            # Get selected account (default to 1 if not set)
+            account_number = session.get("smtp_account", "1")
+
             try:
-                logs = run_email_sender(template_name=template, allow_duplicates=allow_duplicates)
+                logs = run_email_sender(template_name=template,
+                                        allow_duplicates=allow_duplicates,
+                                        account_number=account_number)
                 for log in logs:
                     if "❌" in log or "Error" in log:
                         flash(log, "error")

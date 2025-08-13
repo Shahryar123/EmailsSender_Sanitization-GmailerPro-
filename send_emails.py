@@ -1,4 +1,4 @@
-def run_email_sender(template_name="Template_02.html" , allow_duplicates=False):
+def run_email_sender(template_name="Template_02.html" , allow_duplicates=False, account_number="1"):
     import os
     import pandas as pd
     import smtplib
@@ -14,10 +14,13 @@ def run_email_sender(template_name="Template_02.html" , allow_duplicates=False):
 
     load_dotenv()  # Load environment variables from .env
 
-    SMTP_SERVER = os.getenv("SMTP_SERVER")
-    SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-    SMTP_USER = os.getenv("SMTP_USER")
-    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+    # Get SMTP settings from environment variables
+    # print(f"Using SMTP settings for account: {account_number}")
+
+    SMTP_SERVER = "smtp.gmail.com"
+    SMTP_PORT = 587
+    SMTP_USER = os.getenv(f"SMTP_USER_{account_number}")
+    SMTP_PASSWORD = os.getenv(f"SMTP_PASSWORD_{account_number}")
 
 
     def send_email_smtp(sender, recipient, subject, html_content):

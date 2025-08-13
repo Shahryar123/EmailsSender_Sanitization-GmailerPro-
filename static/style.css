@@ -1,10 +1,13 @@
 body {
-    background: #f0f3ff;
+    /* background: linear-gradient(135deg, #f0f3ff 0%, #8e44ad 100%); */
+        background: linear-gradient(135deg, #e1e5f7, #f7eefb);
+
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 .container {
-    max-width: 900px;
-    margin-top: 50px;
+    max-width: 1100px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     text-align: center;
     color: #3a3a3a;
 }
@@ -193,4 +196,37 @@ svg.icon {
     width: 20px;
     height: 20px;
     fill: currentColor;
+}
+
+/* Select Account */
+.btn-account {
+    width: 100%;
+    background: #3a63d8;
+    background: linear-gradient(135deg, #b1bcdb, #0c309d);
+    border: none;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    padding: 12px 0;
+    margin-top: 20px;
+    box-shadow: 0 6px 15px rgba(58, 99, 216, 0.5);
+    transition: background 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.btn-account:hover {
+    background: #3354cc;
+}
+.card-icon-acc {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
 }
