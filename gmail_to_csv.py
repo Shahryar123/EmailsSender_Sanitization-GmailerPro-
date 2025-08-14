@@ -1,6 +1,5 @@
 from __future__ import print_function
 import os.path
-import pandas as pd
 import re
 import sys
 from datetime import datetime
@@ -8,6 +7,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+import pandas as pd
 
 # Gmail API scope (read-only access)
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']

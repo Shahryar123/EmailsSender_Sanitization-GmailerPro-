@@ -3,3 +3,5 @@
 /EmailsInfo/
 Skipped_Emails.txt
 token.json
+/__pycache__/
+/.vscode/
