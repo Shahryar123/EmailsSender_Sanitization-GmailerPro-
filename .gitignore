@@ -2,6 +2,8 @@
 /GmailAPI_Credentials/
 /EmailsInfo/
 Skipped_Emails.txt
-token.json
+token_1.json
+token_2.json
+token_3.json
 /__pycache__/
 /.vscode/

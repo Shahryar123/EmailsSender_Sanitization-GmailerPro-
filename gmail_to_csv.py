@@ -46,34 +46,44 @@ def main():
     # Parse CLI args
     query = ""
     max_results_arg = None
-
+    # Default account number
+    account_number = "1"
+    
     if len(sys.argv) > 1:
         if sys.argv[1].lower() == "all":
             max_results_arg = None
+            if len(sys.argv) > 2:
+                account_number = sys.argv[2]
         elif sys.argv[1].lower() == "date":
-            query = build_gmail_query(sys.argv[1:])
-            max_results_arg = None  # Gmail will return all in range
+            query = build_gmail_query(sys.argv[1:4])
+            max_results_arg = None
+            if len(sys.argv) > 4:
+                account_number = sys.argv[4]
         else:
             try:
                 max_results_arg = int(sys.argv[1])
             except ValueError:
                 max_results_arg = 10
+            if len(sys.argv) > 2:
+                account_number = sys.argv[2]
     else:
         max_results_arg = 10
 
     # Auth
+    credentials_file = f'GmailAPI_Credentials/credentials_{account_number}.json'
+    token_file = f'token_{account_number}.json'
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists(token_file):
+        creds = Credentials.from_authorized_user_file(token_file, SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'GmailAPI_Credentials/credentials.json', SCOPES
+                credentials_file, SCOPES
             )
             creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
+        with open(token_file, 'w') as token:
             token.write(creds.to_json())
 
     service = build('gmail', 'v1', credentials=creds)

@@ -25,16 +25,20 @@ def index():
             session['email_option'] = email_option
             session['start_date'] = start_date
             session['end_date'] = end_date
+            account_number = session.get("smtp_account", "1")
 
             try:
                 if email_option == "date" and start_date and end_date:
                     subprocess.run(
-                        ["python", "gmail_to_csv.py", "date", start_date, end_date],
+                        ["python", "gmail_to_csv.py", "date", start_date, end_date, account_number],
                         check=True
                     )
                     flash(f"CSV generated for emails from {start_date} to {end_date}!", "success")
                 else:
-                    subprocess.run(["python", "gmail_to_csv.py", "all"], check=True)
+                    subprocess.run(
+                        ["python", "gmail_to_csv.py", "all", account_number],
+                        check=True
+                    )
                     flash("CSV with all emails generated successfully!", "success")
             except subprocess.CalledProcessError:
                 flash("Failed to generate CSV file.", "error")
