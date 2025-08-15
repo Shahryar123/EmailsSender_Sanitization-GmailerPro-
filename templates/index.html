@@ -3,10 +3,11 @@
 <head>
     <title>Email Automation</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   
 </head>
 
 <body>
@@ -51,11 +52,15 @@
                 <h3>Generate CSV</h3>
                 <form method="post" class="mb-0">
                         <label for="email_option" class="form-label">Select Option</label>
+                    <div class="d-flex align-items-center">
                         <select name="email_option" id="email_option" class="form-select" aria-label="Select Option">
                             <option value="all" selected>📨 All Emails</option>
                             <option value="date">📅 Select Date</option>
-                        </select>
-
+                        </select>&nbsp;&nbsp;
+                        <button type="button" id="showBtn" class="btn template-button">
+                            Preview
+                        </button>
+                    </div>
                     <!-- Date inputs (smoothly expand) -->
                     <div id="date_range">
                         <div class="mb-3" style="margin-top: 13px;">
@@ -67,7 +72,7 @@
                             <input type="date" name="end_date" id="end_date" class="form-control">
                         </div>
                     </div>
-                    </br>
+                    </br></br></br>
                     <button type="submit" name="generate_csv" class="btn btn-generate">                  
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-magic" viewBox="0 0 16 16">
                             <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/>
@@ -75,6 +80,7 @@
                         Generate CSV
                     </button>
                 </form>
+                
             </div>
 
             <!-- Send Emails Card -->
@@ -115,6 +121,23 @@
                 
             </div>
         </div>
+
+        <!-- <h3 id="filesHeading" style="display: none;margin-top: 30px;">Files in EmailsInfo</h3> -->
+        <table class="table table-bordered table-hover" id="filesTable" style="display:none;">
+            <thead class="table-dark">
+                <!-- <tr>
+                    <th colspan="4" class="text-center table-heading">Generated CSV Files</th>
+                </tr> -->
+                <tr>
+                    <th>Sr No</th>
+                    <th>File Name</th>
+                    <th>DateTime Created</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="filesList"></tbody>
+        </table>
+
 
     </div>
 
@@ -223,5 +246,40 @@
     });
 </script>
 
+<script>
+document.getElementById("showBtn").addEventListener("click", function () {
+    fetch("/list_csv")
+        .then(response => response.json())
+        .then(files => {
+            const filesList = document.getElementById("filesList");
+            filesList.innerHTML = "";
+
+            if (files.length > 0) {
+                files.forEach(file => {
+                    let row = `
+                        <tr>
+                            <td>${file.sr_no}</td>
+                            <td>${file.name}</td>
+                            <td>${file.created}</td>
+                            <td>
+                                <a href="/download/${file.name}" class="download-icon" title="Download">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                    filesList.innerHTML += row;
+                });
+            } else {
+                filesList.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No CSV files found</td></tr>`;
+            }
+
+            document.getElementById("filesTable").style.display = "table";
+            // document.getElementById("filesHeading").style.display = "block";
+            window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+        });
+});
+
+</script>
 </body>
 </html>

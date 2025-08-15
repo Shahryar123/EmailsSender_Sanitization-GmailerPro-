@@ -1,6 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, get_flashed_messages
+import datetime
+import os
+from flask import Flask, jsonify, render_template,send_from_directory, request, redirect, url_for, flash, session, get_flashed_messages
 import subprocess
 from send_emails import run_email_sender
+
+
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key"  # Required for session and flash messages
@@ -82,6 +86,41 @@ def index():
         last_end_date=last_end_date,
         flash_messages=messages
     )
+
+# // Get files from EmailsInfo directory
+CSV_FOLDER = os.path.join(os.getcwd(), "EmailsInfo")
+
+
+@app.route("/list_csv")
+def list_csv():
+    files = []
+    if os.path.exists(CSV_FOLDER):
+        csv_files = [
+            f for f in os.listdir(CSV_FOLDER) if f.endswith(".csv")
+        ]
+        # Sort by creation time (newest first)
+        csv_files.sort(
+            key=lambda f: os.path.getctime(os.path.join(CSV_FOLDER, f)),
+            reverse=True
+        )
+        
+        for idx, file in enumerate(csv_files, start=1):
+            file_path = os.path.join(CSV_FOLDER, file)
+            created_time = datetime.datetime.fromtimestamp(
+                os.path.getctime(file_path)
+            ).strftime("%Y-%m-%d %H:%M:%S")
+            files.append({
+                "sr_no": idx,
+                "name": file,
+                "created": created_time
+            })
+    return jsonify(files)
+
+
+@app.route("/download/<filename>")
+def download_file(filename):
+    return send_from_directory(CSV_FOLDER, filename, as_attachment=True)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

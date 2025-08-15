@@ -234,14 +234,16 @@ svg.icon {
 /* Button hover animation */
 .template-button {
     transition: all 0.2s ease-in-out;
-    background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
     color: white;
+    background: linear-gradient(135deg, #3c71b1 0%, #a07caf 100%);
+
 
 }
 .template-button:hover {
     transform: scale(1.05);
     box-shadow: 0 0 8px rgba(13, 110, 253, 0.6);
     color: white;
+    background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
 }
 
 /* Modal animation */
@@ -278,4 +280,17 @@ svg.icon {
 }
 .btn-close{
     filter: invert(1);
+}
+
+
+#filesTable {
+    display: none;
+    margin-top: 20px;
+}
+.download-icon {
+    color: #0d6efd;
+    cursor: pointer;
+}
+.download-icon:hover {
+    color: #084298;
 }
