@@ -230,3 +230,52 @@ svg.icon {
     justify-content: center;
     box-shadow: 0 3px 12px rgba(0,0,0,0.1);
 }
+
+/* Button hover animation */
+.template-button {
+    transition: all 0.2s ease-in-out;
+    background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
+    color: white;
+
+}
+.template-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 8px rgba(13, 110, 253, 0.6);
+    color: white;
+}
+
+/* Modal animation */
+.modal.fade .modal-dialog {
+    transform: translateY(-20px) scale(0.95);
+    opacity: 0;
+    transition: all 0.3s ease-out;
+}
+.modal.show .modal-dialog {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* Modal styling */
+.modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* Iframe fade-in */
+#templatePreviewFrame {
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+#templatePreviewFrame.loaded {
+    opacity: 1;
+}
+.modal-header{
+    background: linear-gradient(135deg, #2165b3 0%, #8e44ad 100%);
+    color: white;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+}
+.btn-close{
+    filter: invert(1);
+}
