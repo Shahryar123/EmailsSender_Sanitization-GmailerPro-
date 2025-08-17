@@ -122,6 +122,17 @@ def download_file(filename):
     return send_from_directory(CSV_FOLDER, filename, as_attachment=True)
 
 
+@app.route("/delete/<filename>", methods=["DELETE"])
+def delete_file(filename):
+    file_path = os.path.join(CSV_FOLDER, filename)
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+            return jsonify({"success": True, "message": f"{filename} deleted successfully"})
+        except Exception as e:
+            return jsonify({"success": False, "message": str(e)}), 500
+    else:
+        return jsonify({"success": False, "message": "File not found"}), 404
 
 # ======================
 # New Template Routes

@@ -134,7 +134,7 @@
                     <th>Sr No</th>
                     <th>File Name</th>
                     <th>DateTime Created</th>
-                    <th>Action</th>
+                    <th colspan="2">Actions</th>
                 </tr>
             </thead>
             <tbody id="filesList"></tbody>
@@ -268,19 +268,72 @@ document.getElementById("showBtn").addEventListener("click", function () {
                                     <i class="fa-solid fa-download"></i>
                                 </a>
                             </td>
+                            <td>
+                                <a href="#" class="delete-icon text-danger" data-filename="${file.name}" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
                         </tr>
                     `;
                     filesList.innerHTML += row;
                 });
+
+                // Attach delete event listener
+                document.querySelectorAll(".delete-icon").forEach(icon => {
+                    icon.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        let filename = this.getAttribute("data-filename");
+
+                        Swal.fire({
+                            title: `Delete ${filename}?`,
+                            text: "This action cannot be undone!",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#d33",
+                            cancelButtonColor: "#3085d6",
+                            confirmButtonText: "Yes, delete it!"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch(`/delete/${filename}`, { method: "DELETE" })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            showToast("File deleted successfully!", "success");
+                                            document.getElementById("showBtn").click(); // refresh list
+                                        } else {
+                                            showToast("Error: " + data.message, "error");
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error("Error deleting file:", err);
+                                        showToast("Error deleting file", "error");
+                                    });
+                            }
+                        });
+                    });
+                });
+
             } else {
                 filesList.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No CSV files found</td></tr>`;
             }
 
             document.getElementById("filesTable").style.display = "table";
-            // document.getElementById("filesHeading").style.display = "block";
             window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
         });
 });
+
+// 🔹 Reusable SweetAlert toast
+function showToast(message, icon) {
+    Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: icon,
+        title: message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
+}
 
 </script>
 <script>

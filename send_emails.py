@@ -9,7 +9,6 @@ def run_email_sender(template_name="Template_02.html" , allow_duplicates=False, 
     logs = []  # Collect messages here
 
     CSV_FOLDER = "EmailsInfo"
-    TEMPLATE_FOLDER = "EmailTemplate"
     SENT_WELCOME_FILE = "Skipped_Emails.txt"  # File to track sent welcome emails
 
     load_dotenv()  # Load environment variables from .env
@@ -46,7 +45,7 @@ def run_email_sender(template_name="Template_02.html" , allow_duplicates=False, 
             with open(SENT_WELCOME_FILE, "r") as f:
                 sent_welcome_emails = set(line.strip() for line in f if line.strip())
 
-    with open(os.path.join(TEMPLATE_FOLDER, template_name), "r", encoding="utf-8") as f:
+    with open(template_name) as f:
         template = f.read()
 
     csv_files = [f for f in os.listdir(CSV_FOLDER) if f.startswith("GeneratedEmails_") and f.endswith(".csv")]
