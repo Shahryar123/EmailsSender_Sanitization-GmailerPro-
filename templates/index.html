@@ -98,10 +98,12 @@
                     <label for="template_name" class="form-label">Email Template</label>
                     
                     <div class="d-flex align-items-center">
-                        <select name="template_name" id="template_name" class="form-select" aria-label="Email Template">
-                            <option value="static/Template_01.html">Template 01 - Notification</option>
-                            <option value="static/Template_02.html" selected>Template 02 - Welcome</option>
+                        
+                        <select name="template_name" id="template_name" class="form-select" aria-label="Email Template" onchange="handleTemplateChange(this)">
+                            <option value="" disabled selected>👇 Select Template </option>
+                            <option value="__create_new__">➕ Create New Template</option>
                         </select>&nbsp;&nbsp;
+
                         <button type="button" id="preview_btn" class="btn template-button">
                             Preview
                         </button>
@@ -281,5 +283,44 @@ document.getElementById("showBtn").addEventListener("click", function () {
 });
 
 </script>
+<script>
+    async function loadTemplates() {
+        try {
+            let response = await fetch("/list-templates");
+            let data = await response.json();
+
+            if (data.success) {
+                let select = document.getElementById("template_name");
+
+                // Keep only default and "Create New" options
+                select.innerHTML = `
+                    <option value="" disabled selected>👇 Select Template </option>
+                    <option value="__create_new__">➕ Create New Template</option>
+                `;
+
+                // Add all templates dynamically
+                data.templates.forEach(template => {
+                    let option = document.createElement("option");
+                    option.value = "static/templates/" + template;  // path for usage
+                    option.textContent = "➖ " + template.replace(".html", ""); // show without extension
+                    select.appendChild(option);
+                });
+            }
+        } catch (err) {
+            console.error("Error loading templates:", err);
+        }
+    }
+
+    function handleTemplateChange(selectElement) {
+        if (selectElement.value === "__create_new__") {
+            window.location.href = "/create-template-page";  // open in same tab
+            selectElement.value = ""; // reset to default
+        }
+    }
+
+    // Load templates on page load
+    document.addEventListener("DOMContentLoaded", loadTemplates);
+</script>
+
 </body>
 </html>

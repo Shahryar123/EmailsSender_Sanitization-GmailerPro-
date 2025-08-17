@@ -1,0 +1,92 @@
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #e1e5f7, #f7eefb);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            display: flex;
+            gap: 40px;
+        }
+        .editor-panel {
+            flex: 1;
+        }
+        .preview-panel {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background: white;
+            margin-top: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 400px;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .template-list {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        h1 {
+            font-weight: 700;
+            font-size: 2.8rem;
+            color: #6f42c1;
+            margin-bottom: 1.95rem;
+        }
+        .template-button {
+            transition: all 0.2s ease-in-out;
+            color: white;
+            background: linear-gradient(135deg, #3c71b1 0%, #a07caf 100%);
+
+
+        }
+        .template-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 8px rgba(13, 110, 253, 0.6);
+            color: white;
+            background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
+        }

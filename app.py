@@ -122,5 +122,101 @@ def download_file(filename):
     return send_from_directory(CSV_FOLDER, filename, as_attachment=True)
 
 
+
+# ======================
+# New Template Routes
+# ======================
+
+@app.route("/create-template-page")
+def create_template_page():
+    """Render the page where user can create templates"""
+    return render_template("CreateTemplate.html")
+
+@app.route("/create-template", methods=["POST"])
+def create_template():
+    try:
+        data = request.get_json()
+        template_name = data.get('name')
+        template_content = data.get('content')
+
+        if not template_name or not template_content:
+            return jsonify({'success': False, 'message': 'Template name and content are required'}), 400
+
+        # Sanitize filename
+        sanitized_name = ''.join(c for c in template_name if c.isalnum() or c in ('_', '-'))
+        filename = f"{sanitized_name}.html"
+
+        # Save in static/templates
+        templates_dir = os.path.join(app.root_path, 'static', 'templates')
+        os.makedirs(templates_dir, exist_ok=True)
+        file_path = os.path.join(templates_dir, filename)
+
+        if os.path.exists(file_path):
+            return jsonify({'success': False, 'message': f'Template "{filename}" already exists'}), 400
+
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(template_content)
+
+        return jsonify({
+            'success': True,
+            'message': f'Template "{filename}" created successfully',
+            'filename': f"static/templates/{filename}"
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error creating template: {str(e)}'}), 500
+
+@app.route("/list-templates")
+def list_templates():
+    try:
+        templates_dir = os.path.join(app.root_path, 'static', 'templates')
+        os.makedirs(templates_dir, exist_ok=True)
+
+        template_files = [
+            f for f in os.listdir(templates_dir) if f.endswith('.html')
+        ]
+
+        return jsonify({
+            'success': True,
+            'templates': template_files  # just filenames, not full path
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@app.route("/delete-template/<template_name>", methods=["DELETE"])
+def delete_template(template_name):
+    try:
+        templates_dir = os.path.join(app.root_path, 'static', 'templates')
+        file_path = os.path.join(templates_dir, template_name)
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return jsonify({'success': True, 'message': f'{template_name} deleted successfully'})
+        else:
+            return jsonify({'success': False, 'message': 'Template not found'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+
+
+@app.route("/<template_name>")
+def preview_template(template_name):
+    try:
+        templates_dir = os.path.join(app.root_path, 'static', 'templates')
+        file_path = os.path.join(templates_dir, template_name)
+
+        if not os.path.exists(file_path):
+            return f"Template '{template_name}' not found", 404
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Serve the raw HTML as-is
+        return content  
+
+    except Exception as e:
+        return f"Error loading template: {str(e)}", 500
+
+
 if __name__ == "__main__":
     app.run(debug=True)
