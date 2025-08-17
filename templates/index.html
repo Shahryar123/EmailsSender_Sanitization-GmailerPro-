@@ -73,12 +73,14 @@
                         </div>
                     </div>
                     </br></br></br>
-                    <button type="submit" name="generate_csv" class="btn btn-generate">                  
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-magic" viewBox="0 0 16 16">
+                    <button type="button" id="generateCsvBtn" class="btn btn-generate">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                            class="bi bi-magic" viewBox="0 0 16 16">
                             <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/>
                         </svg>
                         Generate CSV
                     </button>
+
                 </form>
                 
             </div>
@@ -115,10 +117,13 @@
                             Allow Duplicate Values in CSV
                         </label>
                     </div>
-                    <button type="submit" name="send_email" class="btn btn-send">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    <button type="button" id="sendEmailBtn" class="btn btn-send">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
                         Send Emails
                     </button>
+
                 </form>
                 
             </div>
@@ -161,7 +166,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const flashMessages = JSON.parse('{{ flash_messages | tojson | safe }}');
+        const flashMessages = JSON.parse('{{ flash_messages | tojson | safe | default("[]") }}');
+
         if (Array.isArray(flashMessages) && flashMessages.length) {
             flashMessages.forEach(({category, message}) => {
                 Swal.fire({
@@ -375,5 +381,92 @@ function showToast(message, icon) {
     document.addEventListener("DOMContentLoaded", loadTemplates);
 </script>
 
+<script>
+    document.getElementById("generateCsvBtn").addEventListener("click", function () {
+    const emailOption = document.getElementById("email_option").value;
+    const startDate = document.getElementById("start_date").value;
+    const endDate = document.getElementById("end_date").value;
+
+    Swal.fire({
+        title: "Generating CSV...",
+        text: "Please wait while your CSV is being created.",
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch("/generate_csv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            email_option: emailOption,
+            start_date: startDate,
+            end_date: endDate
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        Swal.close(); // close loader
+        if (data.success) {
+            Swal.fire("Success!", data.message, "success");
+            document.getElementById("showBtn").click(); // auto-refresh file list
+        } else {
+            Swal.fire("Error!", data.message, "error");
+        }
+    })
+    .catch(err => {
+        Swal.close();
+        console.error("Error:", err);
+        Swal.fire("Error!", "Something went wrong while generating CSV.", "error");
+    });
+});
+</script>
+
+<script>
+    document.getElementById("sendEmailBtn").addEventListener("click", function () {
+    const template = document.getElementById("template_name").value;
+    const allowDuplicates = document.getElementById("allow_duplicates")?.checked || false;
+
+    Swal.fire({
+        title: "Sending Emails...",
+        text: "Please wait while emails are being sent.",
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch("/send_email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            template_name: template,
+            allow_duplicates: allowDuplicates
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        Swal.close();
+        if (data.success) {
+            Swal.fire("Success!", "Emails sent successfully!", "success");
+        } else {
+            let errorLogs = data.logs.join("<br>");
+            Swal.fire({
+                title: "Some errors occurred",
+                html: errorLogs,
+                icon: "error",
+                width: 600
+            });
+        }
+    })
+    .catch(err => {
+        Swal.close();
+        console.error("Error:", err);
+        Swal.fire("Error!", "Something went wrong while sending emails.", "error");
+    });
+});
+
+    </script>
 </body>
 </html>

@@ -9,6 +9,23 @@ from send_emails import run_email_sender
 app = Flask(__name__)
 app.secret_key = "super_secret_key"  # Required for session and flash messages
 
+
+
+# ------------------------
+# Main page
+# ------------------------
+
+@app.route("/", methods=["GET"])
+def index():
+    flash_messages = get_flashed_messages(with_categories=True)
+    formatted_messages = [
+        {"category": cat, "message": msg} for cat, msg in flash_messages
+    ]
+    return render_template("index.html", flash_messages=formatted_messages)
+
+
+
+
 @app.route("/set-account", methods=["POST"])
 def set_account():
     selected = request.form.get("smtp_account")
@@ -16,78 +33,66 @@ def set_account():
         session["smtp_account"] = selected
     return ("", 204)  # No content response
 
+# ======================
+# Email Sending
+# ======================
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        if "generate_csv" in request.form:
-            email_option = request.form.get("email_option")  # 'all' or 'date'
-            start_date = request.form.get("start_date")
-            end_date = request.form.get("end_date")
+@app.route("/send_email", methods=["POST"])
+def send_email_api():
+    data = request.get_json()
+    template = data.get("template_name")
+    allow_duplicates = data.get("allow_duplicates", False)
+    account_number = session.get("smtp_account", "1")
 
-            # Save the selections in session so they're remembered
-            session['email_option'] = email_option
-            session['start_date'] = start_date
-            session['end_date'] = end_date
-            account_number = session.get("smtp_account", "1")
+    try:
+        logs = run_email_sender(
+            template_name=template,
+            allow_duplicates=allow_duplicates,
+            account_number=account_number
+        )
 
-            try:
-                if email_option == "date" and start_date and end_date:
-                    subprocess.run(
-                        ["python", "gmail_to_csv.py", "date", start_date, end_date, account_number],
-                        check=True
-                    )
-                    flash(f"CSV generated for emails from {start_date} to {end_date}!", "success")
-                else:
-                    subprocess.run(
-                        ["python", "gmail_to_csv.py", "all", account_number],
-                        check=True
-                    )
-                    flash("CSV with all emails generated successfully!", "success")
-            except subprocess.CalledProcessError:
-                flash("Failed to generate CSV file.", "error")
+        errors = [log for log in logs if "❌" in log or "Error" in log]
+        if errors:
+            return jsonify({"success": False, "logs": logs})
+        else:
+            return jsonify({"success": True, "logs": logs})
 
-        elif "send_email" in request.form:
-            template = request.form.get("template_name")
-            email_option = session.get('email_option', 'all')
-             # Get checkbox value (True if checked, False if not)
-            allow_duplicates = request.form.get("allow_duplicates") == "1"
-            
-            # Get selected account (default to 1 if not set)
-            account_number = session.get("smtp_account", "1")
+    except Exception as e:
+        return jsonify({"success": False, "logs": [f"Failed to send emails: {e}"]}), 500
 
-            try:
-                logs = run_email_sender(template_name=template,
-                                        allow_duplicates=allow_duplicates,
-                                        account_number=account_number)
-                for log in logs:
-                    if "❌" in log or "Error" in log:
-                        flash(log, "error")
-                    else:
-                        flash(log, "success")
-            except Exception as e:
-                flash(f"Failed to send emails: {e}", "error")
 
-        return redirect(url_for("index"))
+# ======================
+# Generate CSV
+# ======================
+@app.route("/generate_csv", methods=["POST"])
+def generate_csv():
+    data = request.get_json()
+    email_option = data.get("email_option")
+    start_date = data.get("start_date")
+    end_date = data.get("end_date")
+    account_number = session.get("smtp_account", "1")
 
-    # Load last values for the form
-    last_email_option = session.get('email_option', 'all')
-    last_start_date = session.get('start_date', '')
-    last_end_date = session.get('end_date', '')
+    try:
+        if email_option == "date" and start_date and end_date:
+            subprocess.run(
+                ["python", "gmail_to_csv.py", "date", start_date, end_date, account_number],
+                check=True
+            )
+            return jsonify({"success": True, "message": f"CSV generated for emails from {start_date} to {end_date}!"})
+        else:
+            subprocess.run(
+                ["python", "gmail_to_csv.py", "all", account_number],
+                check=True
+            )
+            return jsonify({"success": True, "message": "CSV with all emails generated successfully!"})
+    except subprocess.CalledProcessError:
+        return jsonify({"success": False, "message": "Failed to generate CSV file."}), 500
 
-    messages = [
-        {'category': cat, 'message': msg}
-        for cat, msg in get_flashed_messages(with_categories=True)
-    ]
-    return render_template(
-        "index.html",
-        last_num_emails=last_email_option,  # still using this name for backward compatibility
-        last_start_date=last_start_date,
-        last_end_date=last_end_date,
-        flash_messages=messages
-    )
 
+# ======================
 # // Get files from EmailsInfo directory
+# ======================
+
 CSV_FOLDER = os.path.join(os.getcwd(), "EmailsInfo")
 
 
