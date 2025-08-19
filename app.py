@@ -1,21 +1,62 @@
 import datetime
 import os
-from flask import Flask, jsonify, render_template,send_from_directory, request, redirect, url_for, flash, session, get_flashed_messages
+from flask import Flask, jsonify, render_template, send_from_directory, request, redirect, url_for, flash, session, get_flashed_messages
 import subprocess
 from send_emails import run_email_sender
-
-
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key"  # Required for session and flash messages
 
+# ------------------------
+# Default User Credentials (for demo)
+# ------------------------
+users = {"admin@gmail.com": "admin"}  # TODO: replace with DB or hashed passwords
 
+# ------------------------
+# Authentication Routes
+# ------------------------
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if username in users and users[username] == password:
+            session["user"] = username
+            flash("Login successful!", "success")
+            return redirect(url_for("index"))
+        else:
+            flash("Invalid username or password", "error")
+            return redirect(url_for("login"))
+
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    flash("Logged out successfully!", "success")
+    return redirect(url_for("login"))
+
+# ------------------------
+# Helper: Require login
+# ------------------------
+def login_required(func):
+    from functools import wraps
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if "user" not in session:
+            flash("Please log in first.", "error")
+            return redirect(url_for("login"))
+        return func(*args, **kwargs)
+    return wrapper
 
 # ------------------------
 # Main page
 # ------------------------
 
 @app.route("/", methods=["GET"])
+@login_required
 def index():
     flash_messages = get_flashed_messages(with_categories=True)
     formatted_messages = [
@@ -23,21 +64,19 @@ def index():
     ]
     return render_template("index.html", flash_messages=formatted_messages)
 
-
-
-
 @app.route("/set-account", methods=["POST"])
+@login_required
 def set_account():
     selected = request.form.get("smtp_account")
     if selected:
         session["smtp_account"] = selected
-    return ("", 204)  # No content response
+    return ("", 204)
 
 # ======================
 # Email Sending
 # ======================
-
 @app.route("/send_email", methods=["POST"])
+@login_required
 def send_email_api():
     data = request.get_json()
     template = data.get("template_name")
@@ -60,11 +99,11 @@ def send_email_api():
     except Exception as e:
         return jsonify({"success": False, "logs": [f"Failed to send emails: {e}"]}), 500
 
-
 # ======================
 # Generate CSV
 # ======================
 @app.route("/generate_csv", methods=["POST"])
+@login_required
 def generate_csv():
     data = request.get_json()
     email_option = data.get("email_option")
@@ -88,22 +127,19 @@ def generate_csv():
     except subprocess.CalledProcessError:
         return jsonify({"success": False, "message": "Failed to generate CSV file."}), 500
 
-
 # ======================
-# // Get files from EmailsInfo directory
+# Files
 # ======================
-
 CSV_FOLDER = os.path.join(os.getcwd(), "EmailsInfo")
 
-
 @app.route("/list_csv")
+@login_required
 def list_csv():
     files = []
     if os.path.exists(CSV_FOLDER):
         csv_files = [
             f for f in os.listdir(CSV_FOLDER) if f.endswith(".csv")
         ]
-        # Sort by creation time (newest first)
         csv_files.sort(
             key=lambda f: os.path.getctime(os.path.join(CSV_FOLDER, f)),
             reverse=True
@@ -121,13 +157,13 @@ def list_csv():
             })
     return jsonify(files)
 
-
 @app.route("/download/<filename>")
+@login_required
 def download_file(filename):
     return send_from_directory(CSV_FOLDER, filename, as_attachment=True)
 
-
 @app.route("/delete/<filename>", methods=["DELETE"])
+@login_required
 def delete_file(filename):
     file_path = os.path.join(CSV_FOLDER, filename)
     if os.path.exists(file_path):
@@ -140,15 +176,15 @@ def delete_file(filename):
         return jsonify({"success": False, "message": "File not found"}), 404
 
 # ======================
-# New Template Routes
+# Template Routes
 # ======================
-
 @app.route("/create-template-page")
+@login_required
 def create_template_page():
-    """Render the page where user can create templates"""
     return render_template("CreateTemplate.html")
 
 @app.route("/create-template", methods=["POST"])
+@login_required
 def create_template():
     try:
         data = request.get_json()
@@ -158,11 +194,9 @@ def create_template():
         if not template_name or not template_content:
             return jsonify({'success': False, 'message': 'Template name and content are required'}), 400
 
-        # Sanitize filename
         sanitized_name = ''.join(c for c in template_name if c.isalnum() or c in ('_', '-'))
         filename = f"{sanitized_name}.html"
 
-        # Save in static/templates
         templates_dir = os.path.join(app.root_path, 'static', 'templates')
         os.makedirs(templates_dir, exist_ok=True)
         file_path = os.path.join(templates_dir, filename)
@@ -183,6 +217,7 @@ def create_template():
         return jsonify({'success': False, 'message': f'Error creating template: {str(e)}'}), 500
 
 @app.route("/list-templates")
+@login_required
 def list_templates():
     try:
         templates_dir = os.path.join(app.root_path, 'static', 'templates')
@@ -194,12 +229,13 @@ def list_templates():
 
         return jsonify({
             'success': True,
-            'templates': template_files  # just filenames, not full path
+            'templates': template_files
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
 @app.route("/delete-template/<template_name>", methods=["DELETE"])
+@login_required
 def delete_template(template_name):
     try:
         templates_dir = os.path.join(app.root_path, 'static', 'templates')
@@ -213,9 +249,8 @@ def delete_template(template_name):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
-
-
 @app.route("/<template_name>")
+@login_required
 def preview_template(template_name):
     try:
         templates_dir = os.path.join(app.root_path, 'static', 'templates')
@@ -227,12 +262,10 @@ def preview_template(template_name):
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # Serve the raw HTML as-is
         return content  
 
     except Exception as e:
         return f"Error loading template: {str(e)}", 500
-
 
 if __name__ == "__main__":
     app.run(debug=True)

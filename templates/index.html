@@ -7,10 +7,23 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-   
+
 </head>
 
 <body>
+    <!-- Navbar -->
+    <nav style="background: linear-gradient(to right, #1f0059, #d2c7ee, #dcd9e5); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; color: white;">
+    <!-- Left Side -->
+    <div class="navbar-heading-minimal">Email Extractor</div>
+
+    <!-- Right Side Dropdown -->
+    <div style="position: relative;">
+        <span onclick="toggleDropdown()" style="cursor: pointer; font-size: 25px;">👤</span>
+        <div id="dropdownMenu" style="display: none; position: absolute; right: 0; background: white; color: black; border-radius: 15px; box-shadow: 0 14px 16px rgba(0,0,0,0.1); margin-top: 8px; min-width: 220px; text-align: left; z-index: 100;">
+        <a href="/logout" style="display: block; padding: 10px; text-decoration: none; color: black;">🚫 Sign Out</a>
+        </div>
+    </div>
+    </nav>
     <div class="container">
         <!-- Center circle icon above the title -->
         <div class="icon-circle" aria-hidden="true">
@@ -467,6 +480,20 @@ function showToast(message, icon) {
     });
 });
 
+    </script>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById("dropdownMenu");
+            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", function (e) {
+            const dropdown = document.getElementById("dropdownMenu");
+            if (!e.target.closest("nav")) {
+            dropdown.style.display = "none";
+            }
+        });
     </script>
 </body>
 </html>

@@ -294,3 +294,25 @@ svg.icon {
 .download-icon:hover {
     color: #084298;
 }
+
+/* NAVBAR TITLE  */
+.navbar-heading-minimal {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    position: relative;
+    display: inline-block;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.navbar-heading-minimal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -10px;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #ec4899, #f97316);
+    border-radius: 2px;
+}

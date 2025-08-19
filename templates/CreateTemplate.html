@@ -12,14 +12,26 @@
     <title>Template Creator</title>
 </head>
 <body>
-<div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
+    <!-- Navbar -->
+    <nav style="background: linear-gradient(to right, #1f0059, #d2c7ee, #dcd9e5); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; color: white;">
+    <!-- Left Side -->
     <!-- Back to Main Page (left-aligned inside flex) -->
-    <a href="{{ url_for('index') }}" 
-        style="position: absolute; left: 20px; text-decoration: none;  font-weight: bold; font-size: 1.3rem;">
-        👈 Back to Home
-    </a>
+    <div style="font-size: 20px; font-weight: bold;">
+        <a href="{{ url_for('index') }}" 
+            style=" left: 20px; text-decoration: none;  font-weight: bold; font-size: 1.3rem;color: white;">
+            👈 Back to Home
+        </a>
+    </div>
 
-
+    <!-- Right Side Dropdown -->
+    <div style="position: relative;">
+        <span onclick="toggleDropdown()" style="cursor: pointer; font-size: 25px;">👤</span>
+        <div id="dropdownMenu" style="display: none; position: absolute; right: 0; background: white; color: black; border-radius: 15px; box-shadow: 0 14px 16px rgba(0,0,0,0.1); margin-top: 8px; min-width: 220px; text-align: left; z-index: 100;">
+        <a href="/logout" style="display: block; padding: 10px; text-decoration: none; color: black;">🚫 Sign Out</a>
+        </div>
+    </div>
+    </nav>
+<div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; margin-top: 20px;">    
     <!-- Centered Title -->
     <h1>Template Creator</h1>
 </div>
@@ -70,20 +82,21 @@
         <h3>Existing Templates</h3>
         <div id="templatesList">Click "List Templates" to see existing templates</div>
     </div> -->
-    <!-- Templates Section -->
-    <h3 id="templatesHeading" style="display:none; margin-top:30px;">Available Templates</h3>
-   <table class="table table-bordered table-hover text-center" id="templatesTable" style="display:none;">
-    <thead class="table-dark">
-        <tr>
-            <th>Sr No</th>
-            <th>Template Name</th>
-            <th>Preview</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody id="templatesList"></tbody>
-</table>
-
+        <!-- Templates Section -->
+        <div style="max-width: 1200px;margin: 0 auto; padding: 20px;">
+            <h3 id="templatesHeading" style="display:none; margin-top:30px;">Available Templates</h3>
+            <table class="table table-bordered table-hover text-center" id="templatesTable" style="display:none;">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Sr No</th>
+                        <th>Template Name</th>
+                        <th>Preview</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="templatesList"></tbody>
+            </table>
+        </div>
 
     <script>
         async function createTemplate() {
@@ -344,6 +357,19 @@
     // Load templates on page load
     document.addEventListener("DOMContentLoaded", loadTemplates);
 </script>
+<script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById("dropdownMenu");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
 
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function (e) {
+        const dropdown = document.getElementById("dropdownMenu");
+        if (!e.target.closest("nav")) {
+        dropdown.style.display = "none";
+        }
+    });
+</script>
 </body>
 </html>

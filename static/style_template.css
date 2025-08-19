@@ -1,13 +1,12 @@
 
         body {
             font-family: Arial, sans-serif;
-            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
             background: linear-gradient(135deg, #e1e5f7, #f7eefb);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .container {
+            max-width: 1200px;
             display: flex;
             gap: 40px;
         }
