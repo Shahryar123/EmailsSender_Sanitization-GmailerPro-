@@ -1,3 +1,4 @@
+import csv
 import datetime
 import os
 from flask import Flask, jsonify, render_template, send_from_directory, request, redirect, url_for, flash, session, get_flashed_messages
@@ -269,6 +270,18 @@ def preview_template(template_name):
 
     except Exception as e:
         return f"Error loading template: {str(e)}", 500
+
+CSV_FILE = os.path.join("static", "EmailsRecord.csv")
+
+@app.route("/api/records")
+def get_records():
+    records = []
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                records.append(row)
+    return jsonify(records)
 
 if __name__ == "__main__":
     app.run(debug=True)

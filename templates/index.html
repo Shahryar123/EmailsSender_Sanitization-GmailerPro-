@@ -183,22 +183,62 @@
                 </div>
 
                 <div class="stat-item emails-sent">
-                    <div class="stat-number">1,234</div>
-                    <div class="stat-label">Emails Sent</div>
+                    <div class="stat-number" id="totalEmailsSent">0</div>
+                    <div class="stat-label">Total Emails</div>
                 </div>
-                
+                                
                 <div class="stat-item delivery-rate">
-                    <div class="stat-number">98%</div>
+                    <div class="stat-number">99%</div>
                     <div class="stat-label">Delivery Rate</div>
                 </div>
                 
                 <div class="stat-item active-campaigns">
-                    <div class="stat-number">156</div>
+                    <div class="stat-number">2</div>
                     <div class="stat-label">Active Campaigns</div>
                 </div>
-            </div
-            >
+            </div>
         </div>
+
+       <!-- Table container (initially hidden) -->
+        <div id="recordsTableContainer">
+            <h3>📈 Email Records</h3>
+            <input type="text" id="search" placeholder="🔍 Search records...">
+
+            <!-- Pagination Controls -->
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    <span id="recordsInfo">Showing 0 - 0 of 0 records</span>
+                    <select id="recordsPerPage" class="records-per-page">
+                        <option value="5">5 per page</option>
+                        <option value="10" selected>10 per page</option>
+                        <option value="25">25 per page</option>
+                        <option value="50">50 per page</option>
+                    </select>
+                </div>
+                <div class="pagination-controls">
+                    <button id="firstPage" class="pagination-btn">⏮️</button>
+                    <button id="prevPage" class="pagination-btn">◀️</button>
+                    <span id="pageInfo" class="page-info">Page 1 of 1</span>
+                    <button id="nextPage" class="pagination-btn">▶️</button>
+                    <button id="lastPage" class="pagination-btn">⏭️</button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <table id="recordsTable">
+                <thead>
+                <tr id="tableHead"></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Success message -->
+    <div id="successMessage" class="success-message">
+        ✅ Records loaded successfully!
+    </div>
+
     </div>
 
 <!-- Preview Modal -->
@@ -866,5 +906,283 @@ document.addEventListener("DOMContentLoaded", () => {
             updateCheckboxes();
         }
     </script>
+     
+     <script>
+        // Pagination variables
+        let currentPage = 1;
+        let recordsPerPage = 10;
+        let filteredData = [];
+        let allData = [];
+
+        async function fetchRecords() {
+            try {
+                // Show loading
+                const tableBody = document.getElementById("tableBody");
+                tableBody.innerHTML = '<tr><td colspan="100%" class="loading">Loading records</td></tr>';
+
+                // For demo purposes, we'll use mock data. Replace this with actual fetch
+                 const res = await fetch("/api/records");
+                 const data = await res.json();
+                
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                //const data = mockData;
+
+                if (data.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="100%" style="text-align: center; padding: 40px; color: #6b7280;">No records found</td></tr>';
+                    return;
+                }
+
+                // Store data globally
+                allData = data;
+                filteredData = [...data]; // Copy of data for filtering
+
+                // Build table header from CSV column order
+                const columnOrder = ["Sr.No", "Email", "Template", "DateTime"];
+                const tableHead = document.getElementById("tableHead");
+                tableHead.innerHTML = "";
+                
+                columnOrder.forEach(key => {
+                    if (data[0].hasOwnProperty(key)) {
+                        const th = document.createElement("th");
+                        th.textContent = key;
+                        tableHead.appendChild(th);
+                    }
+                });
+
+                // Reset pagination
+                currentPage = 1;
+                updatePagination();
+                renderCurrentPage();
+
+                // Show success message
+                showSuccessMessage();
+
+                // Search functionality
+                const searchInput = document.getElementById("search");
+                searchInput.removeEventListener("input", handleSearch);
+                searchInput.addEventListener("input", handleSearch);
+
+                // Records per page change
+                const recordsPerPageSelect = document.getElementById("recordsPerPage");
+                recordsPerPageSelect.removeEventListener("change", handleRecordsPerPageChange);
+                recordsPerPageSelect.addEventListener("change", handleRecordsPerPageChange);
+
+                // Pagination button events
+                setupPaginationEvents();
+
+            } catch (error) {
+                console.error("Error fetching records:", error);
+                const tableBody = document.getElementById("tableBody");
+                tableBody.innerHTML = '<tr><td colspan="100%" style="text-align: center; padding: 40px; color: #dc2626;">Error loading records</td></tr>';
+            }
+        }
+
+        function handleSearch() {
+            const query = this.value.toLowerCase();
+            filteredData = allData.filter(row =>
+                Object.values(row).some(val =>
+                    String(val).toLowerCase().includes(query)
+                )
+            );
+            currentPage = 1; // Reset to first page
+            updatePagination();
+            renderCurrentPage();
+        }
+
+        function handleRecordsPerPageChange() {
+            recordsPerPage = parseInt(this.value);
+            currentPage = 1; // Reset to first page
+            updatePagination();
+            renderCurrentPage();
+        }
+
+        function renderCurrentPage() {
+            const startIndex = (currentPage - 1) * recordsPerPage;
+            const endIndex = startIndex + recordsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            renderTable(pageData);
+            updateRecordsInfo();
+        }
+
+        function renderTable(records) {
+            const tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = "";
+            
+            const columnOrder = ["Sr.No", "Email", "Template", "DateTime"];
+            
+            records.forEach((row, index) => {
+                const tr = document.createElement("tr");
+                tr.style.animationDelay = `${index * 0.1}s`;
+                
+                // Render columns in correct order
+                columnOrder.forEach(key => {
+                    if (row.hasOwnProperty(key)) {
+                        const td = document.createElement("td");
+                        td.textContent = row[key];
+                        
+                        // Add special styling for specific columns
+                        if (key === "Sr.No") {
+                            td.style.fontWeight = "600";
+                            td.style.color = "#4f46e5";
+                        } else if (key === "Email") {
+                            td.style.color = "#059669";
+                        } else if (key === "Template") {
+                            td.style.color = "#7c3aed";
+                            td.style.fontWeight = "500";
+                        }
+                        
+                        tr.appendChild(td);
+                    }
+                });
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+            
+            // Update page info
+            document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages}`;
+            
+            // Update button states
+            document.getElementById("firstPage").disabled = currentPage === 1;
+            document.getElementById("prevPage").disabled = currentPage === 1;
+            document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
+            document.getElementById("lastPage").disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        function updateRecordsInfo() {
+            const startRecord = Math.min((currentPage - 1) * recordsPerPage + 1, filteredData.length);
+            const endRecord = Math.min(currentPage * recordsPerPage, filteredData.length);
+            const totalRecords = filteredData.length;
+            
+            document.getElementById("recordsInfo").textContent = 
+                `Showing ${startRecord} - ${endRecord} of ${totalRecords} records`;
+        }
+
+        function setupPaginationEvents() {
+            const totalPages = Math.ceil(filteredData.length / recordsPerPage);
+            
+            document.getElementById("firstPage").onclick = () => {
+                currentPage = 1;
+                updatePagination();
+                renderCurrentPage();
+            };
+            
+            document.getElementById("prevPage").onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updatePagination();
+                    renderCurrentPage();
+                }
+            };
+            
+            document.getElementById("nextPage").onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updatePagination();
+                    renderCurrentPage();
+                }
+            };
+            
+            document.getElementById("lastPage").onclick = () => {
+                currentPage = totalPages;
+                updatePagination();
+                renderCurrentPage();
+            };
+        }
+
+        function showSuccessMessage() {
+            const message = document.getElementById("successMessage");
+            message.classList.add("show");
+            setTimeout(() => {
+                message.classList.remove("show");
+            }, 3000);
+        }
+
+        // ✅ Hook up All Records button with animation
+        document.querySelector(".all-record").addEventListener("click", async () => {
+            const button = document.querySelector(".all-record");
+            const originalText = button.textContent;
+            
+            // Change button text during loading
+            button.textContent = "⏳ Loading...";
+            button.disabled = true;
+            
+            try {
+                await fetchRecords();
+                
+                // Show table with animation
+                const tableContainer = document.getElementById("recordsTableContainer");
+                tableContainer.style.display = "block";
+                
+                // Trigger reflow to ensure display change is applied
+                tableContainer.offsetHeight;
+                
+                // Add show class for animation
+                setTimeout(() => {
+                    tableContainer.classList.add("show");
+                    tableContainer.scrollIntoView({ behavior: "smooth" });
+                }, 50);
+                
+            } finally {
+                // Reset button
+                button.textContent = originalText;
+                button.disabled = false;
+            }
+        });
+
+        // Last Run button functionality
+        document.querySelector(".last-run").addEventListener("click", () => {
+            alert("Last Run functionality - integrate with your backend!");
+        });
+
+        // Function to fetch and display total email count immediately
+        async function fetchTotalEmailsCount() {
+            try {
+                const res = await fetch("/api/records");
+                const data = await res.json();
+                
+                // Update total emails count
+                const totalEmails = data.length;
+                animateCounter('totalEmailsSent', totalEmails);
+                
+            } catch (error) {
+                console.error("Error fetching total count:", error);
+                document.getElementById('totalEmailsSent').textContent = "Error";
+            }
+        }
+
+        function animateCounter(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            const startValue = 0;
+            const duration = 1000;
+            const startTime = Date.now();
+
+            function updateCounter() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const currentValue = Math.floor(startValue + (targetValue - startValue) * easeOutQuart);
+                
+                element.textContent = currentValue.toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    element.textContent = targetValue.toLocaleString();
+                }
+            }
+
+            requestAnimationFrame(updateCounter);
+        }
+
+        // Call immediately when page loads
+        document.addEventListener('DOMContentLoaded', fetchTotalEmailsCount);
+    </script>
+
 </body>
 </html>
