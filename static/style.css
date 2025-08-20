@@ -469,6 +469,7 @@ svg.icon {
 }
 .stat-title {
     font-size: 2rem;
+    margin-bottom: 10px;
     font-weight: 700;
     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     -webkit-background-clip: text;
