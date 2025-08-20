@@ -457,3 +457,146 @@ svg.icon {
     background: linear-gradient(135deg, #667eea, #764ba2);
     border-radius: 3px;
 }
+
+/* EMAIL STATS BAR  */
+
+.statsCard {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+}
+.stat-title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.stats-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 40px 50px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 80px;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.stat-item {
+    text-align: center;
+    position: relative;
+}
+
+.stat-item::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, #5d6886, transparent);
+}
+
+.stat-item:last-child::after {
+    display: none;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    color: #6b7280;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.emails-sent {
+    --color-primary: #3b82f6;
+    --color-secondary: #1d4ed8;
+}
+
+.delivery-rate {
+    --color-primary: #8b5cf6;
+    --color-secondary: #7c3aed;
+}
+
+.active-campaigns {
+    --color-primary: #10b981;
+    --color-secondary: #059669;
+}
+
+@media (max-width: 768px) {
+    .stats-container {
+        flex-direction: column;
+        gap: 30px;
+        padding: 30px;
+    }
+
+    .stat-item::after {
+        display: none;
+    }
+
+    .stat-number {
+        font-size: 2.8rem;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+    }
+}
+
+/* Subtle animation on load */
+.stat-item {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.stat-item:nth-child(1) { animation-delay: 0.1s; }
+.stat-item:nth-child(2) { animation-delay: 0.2s; }
+.stat-item:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.all-record{
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+.all-record:hover {
+    background: linear-gradient(135deg, #0f9b68, #0f9b68);
+    color: white;
+}
+
+.last-run {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+.last-run:hover {
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    color: white;
+}

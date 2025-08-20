@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+  
 </head>
 
 <body>
@@ -173,7 +173,31 @@
             <tbody id="filesList"></tbody>
         </table>
 
+        <div class="statsCard">
+            <div class="stats-container">
+                <div class="stat-item emails-sent">
+                    <div class="stat-title">Emails Record</div>
+                    <button class="btn all-record">📋 All Records</button>&nbsp;
+                    <button class="btn last-run">↩️ Last Run</button>
+                </div>
 
+                <div class="stat-item emails-sent">
+                    <div class="stat-number">1,234</div>
+                    <div class="stat-label">Emails Sent</div>
+                </div>
+                
+                <div class="stat-item delivery-rate">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">Delivery Rate</div>
+                </div>
+                
+                <div class="stat-item active-campaigns">
+                    <div class="stat-number">156</div>
+                    <div class="stat-label">Active Campaigns</div>
+                </div>
+            </div
+            >
+        </div>
     </div>
 
 <!-- Preview Modal -->
