@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
 </head>
 
 <body>
@@ -84,9 +84,8 @@
                             <label for="end_date" class="form-label">To Date</label>
                             <input type="date" name="end_date" id="end_date" class="form-control">
                         </div>
-                    </div>
-                    </br></br></br>
-                    <button type="button" id="generateCsvBtn" class="btn btn-generate">
+                    </div></br></br>
+                    <button type="button" id="generateCsvBtn" class="btn btn-generate" >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
                             class="bi bi-magic" viewBox="0 0 16 16">
                             <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/>
@@ -108,12 +107,11 @@
                     </svg>
                 </div>
                 <h3>Send Emails</h3>
-                <form method="post" class="mb-0">
+                <form id="emailCardForm" method="post" class="mb-0">
                     <input type="hidden" name="num_emails" value="{{ last_num_emails }}">
                     <label for="template_name" class="form-label">Email Template</label>
                     
                     <div class="d-flex align-items-center">
-                        
                         <select name="template_name" id="template_name" class="form-select" aria-label="Email Template" onchange="handleTemplateChange(this)">
                             <option value="" disabled selected>👇 Select Template </option>
                             <option value="__create_new__">➕ Create New Template</option>
@@ -123,13 +121,29 @@
                             Preview
                         </button>
                     </div>
+
+                    <!--Select CSVs-->
+                    <div class="container mt-4">
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <!-- CSV Button -->
+                            <button type="button" class="btn csvButton" data-bs-toggle="modal" data-bs-target="#csvModal">
+                            <i class="fas fa-plus"></i> Select CSV Files
+                            </button>
+
+                            <!-- Counter -->
+                            <span class="selection-counter fw-semibold" id="selectionCounter">
+                            <i class="fas fa-file"></i> 0 files selected
+                            </span>
+                        </div>
+                    </div>
+
                     <!-- Checkbox for duplicate values -->
-                    <div class="form-check">
+                    <!-- <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="allow_duplicates" id="allow_duplicates" value="1">
                         <label class="form-check-label" for="allow_duplicates">
                             Allow Duplicate Values in CSV
                         </label>
-                    </div>
+                    </div> -->
                     <button type="button" id="sendEmailBtn" class="btn btn-send">
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -139,6 +153,7 @@
 
                 </form>
                 
+                 
             </div>
         </div>
 
@@ -174,6 +189,45 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Modal for CSV Selection -->
+<div class="modal fade" id="csvModal" tabindex="-1" aria-labelledby="csvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="csvModalLabel">
+                    <i class="fas fa-file-csv"></i> Select CSV Files
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="csv-search-input w-100" placeholder="🔍 Search CSV files..." id="csvSearch">
+                </div>
+                <div class="mb-3">
+                    <button class="btn btn-outline-primary btn-sm" id="selectAll">
+                        <i class="fas fa-check-double"></i> Select All
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm ms-2" id="clearAll">
+                        <i class="fas fa-times"></i> Clear All
+                    </button>
+                    <span class="ms-3 text-muted" id="modalCounter">0 files selected</span>
+                </div>
+                <div class="modal-file-list" style="max-height: 400px; overflow-y: auto;" id="csvFileList">
+                    <!-- CSV files will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button> -->
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="confirmSelection">
+                    <i class="fas fa-check"></i> Confirm Selection (<span id="confirmCounter">0</span>)
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- SweetAlert2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -436,7 +490,7 @@ function showToast(message, icon) {
 });
 </script>
 
-<script>
+<!-- <script>
     document.getElementById("sendEmailBtn").addEventListener("click", function () {
     const template = document.getElementById("template_name").value;
     const allowDuplicates = document.getElementById("allow_duplicates")?.checked || false;
@@ -480,20 +534,312 @@ function showToast(message, icon) {
     });
 });
 
-    </script>
-    <script>
-        function toggleDropdown() {
-            const dropdown = document.getElementById("dropdownMenu");
-            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+</script> -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const sendBtn = document.getElementById("sendEmailBtn");
+
+    sendBtn.addEventListener("click", function (event) {
+        event.preventDefault(); // stop form from submitting
+
+        const template = document.getElementById("template_name").value;
+        const allowDuplicates = document.getElementById("allow_duplicates")?.checked || false;
+
+        // ✅ Collect selected checkboxes (example: emails or IDs)
+        const checkboxes = document.querySelectorAll('#csvFileList input[type="checkbox"]:checked');
+        const selectedItems = Array.from(checkboxes).map(cb => cb.value);
+
+        //console.log("Checked boxes:", selectedItems);
+
+        if (selectedItems.length === 0) {
+            Swal.fire("No Selection", "Please select at least one CSV file.", "warning");
+            return;
         }
 
-        // Close dropdown when clicking outside
-        document.addEventListener("click", function (e) {
-            const dropdown = document.getElementById("dropdownMenu");
-            if (!e.target.closest("nav")) {
-            dropdown.style.display = "none";
+        Swal.fire({
+            title: "Sending Emails...",
+            text: "Please wait while emails are being sent.",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
             }
         });
+
+        fetch("/send_email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                template_name: template,
+                allow_duplicates: allowDuplicates,
+                csv_files: selectedItems   // ✅ match Flask app.py
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            Swal.close();
+            if (data.success) {
+                const successMsg = data.logs.find(msg => msg.includes("Successfully sent"));
+                console.log(successMsg);
+                if (successMsg) {
+                    Swal.fire("Success!", successMsg, "success");
+                } else {
+                    Swal.fire("Success!", "Emails sent successfully!", "success");
+                }
+                // Reset form and counters
+                document.getElementById("emailCardForm").reset();
+                document.getElementById("selectionCounter").innerHTML = `<i class="fas fa-file"></i> 0 files selected`;
+                document.querySelectorAll('#csvFileList input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+            } else {
+                let errorLogs = (data.logs || []).join("<br>");
+                Swal.fire({
+                    title: "Some errors occurred",
+                    html: errorLogs || "Unknown error.",
+                    icon: "error",
+                    width: 600
+                });
+            }
+        })
+        .catch(err => {
+            Swal.close();
+            console.error("Error:", err);
+            Swal.fire("Error!", "Something went wrong while sending emails.", "error");
+        });
+    });
+});
+</script>
+
+<!-- LOGOUT DROPDOWN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById("dropdownMenu");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function (e) {
+        const dropdown = document.getElementById("dropdownMenu");
+        if (!e.target.closest("nav")) {
+        dropdown.style.display = "none";
+        }
+    });
+</script>
+
+<!-- CSV SELECTION TAGS -->
+      <script>
+        let selectedFiles = new Set();
+        let allFiles = [];
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadCSVFiles();
+            setupEventListeners();
+        });
+
+        // Load CSV files from your API
+        async function loadCSVFiles() {
+            try {
+                // Replace this with your actual API call
+                 const response = await fetch("/list_csv");
+                 allFiles = await response.json();
+                
+                // If your API returns different structure, adjust accordingly
+                // Expected format: [{ sr_no: 1, name: "file.csv", created: "2024-01-01" }]
+                
+                renderFileList();
+            } catch (error) {
+                console.error("Error loading CSV files:", error);
+                // Fallback to sample data for demo
+                allFiles = [
+                    { sr_no: 1, name: "customers_data.csv", created: "2024-01-15" },
+                    { sr_no: 2, name: "sales_report.csv", created: "2024-01-20" },
+                    { sr_no: 3, name: "email_contacts.csv", created: "2024-02-01" }
+                ];
+                renderFileList();
+            }
+        }
+
+        // Render file list in modal
+        function renderFileList(filesToRender = allFiles) {
+            const container = document.getElementById("csvFileList");
+            container.innerHTML = "";
+
+            filesToRender.forEach(file => {
+                const div = document.createElement("div");
+                div.className = "csv-item";
+                div.setAttribute("data-file", file.name);
+                
+                div.innerHTML = `
+                    <div class="csv-item-header">
+                        <div>
+                            <div class="csv-item-name">${file.name}</div>
+                            <div class="csv-item-meta">
+                                📅 Created: ${file.created}
+                            </div>
+                        </div>
+                        <input class="csv-checkbox" type="checkbox" value="${file.name}" id="csv_${file.sr_no}">
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+
+            // Update checkboxes based on current selection
+            updateCheckboxes();
+        }
+
+        // Update tag display
+        function updateTags() {
+            // const container = document.getElementById("csvTagContainer");
+            // const counter = document.getElementById("selectionCounter");
+            
+            // if (selectedFiles.size === 0) {
+            //     container.innerHTML = `
+            //         <div class="text-muted text-center">
+            //             <i class="fas fa-file-csv fa-2x mb-2" style="opacity: 0.3;"></i>
+            //             <p>No files selected. Click "Select CSV Files" to choose files.</p>
+            //         </div>
+            //     `;
+            //     container.classList.remove("has-files");
+            // } else {
+            //     container.innerHTML = "";
+            //     container.classList.add("has-files");
+                
+            //     Array.from(selectedFiles).forEach(fileName => {
+            //         const tag = document.createElement("div");
+            //         tag.className = "csv-tag";
+            //         tag.innerHTML = `
+            //             <i class="fas fa-file-csv"></i>
+            //             ${fileName}
+            //             <i class="fas fa-times remove-tag" onclick="removeTag('${fileName}')"></i>
+            //         `;
+            //         container.appendChild(tag);
+            //     });
+            // }
+            
+            // Update all counters
+            updateAllCounters();
+        }
+
+        // Separate function to update all counters
+        function updateAllCounters() {
+            const count = selectedFiles.size;
+            document.getElementById("selectionCounter").innerHTML = `<i class="fas fa-file"></i> ${count} files selected`;
+            updateModalCounter();
+        }
+
+        // Update modal counter
+        function updateModalCounter() {
+            const count = selectedFiles.size;
+            document.getElementById("modalCounter").textContent = `${count} files selected`;
+            document.getElementById("confirmCounter").textContent = count;
+        }
+
+        // Remove tag function
+        function removeTag(fileName) {
+            selectedFiles.delete(fileName);
+            updateTags();
+            updateCheckboxes();
+        }
+
+        // Update checkboxes based on selection
+        function updateCheckboxes() {
+            document.querySelectorAll(".csv-checkbox").forEach(checkbox => {
+                checkbox.checked = selectedFiles.has(checkbox.value);
+                
+                const item = checkbox.closest(".csv-item");
+                if (selectedFiles.has(checkbox.value)) {
+                    item.classList.add("selected");
+                } else {
+                    item.classList.remove("selected");
+                }
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // File selection in modal - using event delegation
+            document.getElementById("csvFileList").addEventListener("change", (e) => {
+                if (e.target.classList.contains("csv-checkbox")) {
+                    const fileName = e.target.value;
+                    if (e.target.checked) {
+                        selectedFiles.add(fileName);
+                    } else {
+                        selectedFiles.delete(fileName);
+                    }
+                    // Update all displays immediately
+                    updateTags();
+                    updateCheckboxes();
+                    updateModalCounter();
+                }
+            });
+
+            // Also add click event for individual items
+            document.getElementById("csvFileList").addEventListener("click", (e) => {
+                if (e.target.closest(".csv-item") && !e.target.classList.contains("csv-checkbox")) {
+                    const item = e.target.closest(".csv-item");
+                    const checkbox = item.querySelector(".csv-checkbox");
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        // Manually trigger the change event
+                        const event = new Event('change', { bubbles: true });
+                        checkbox.dispatchEvent(event);
+                    }
+                }
+            });
+
+            // Search functionality
+            document.getElementById("csvSearch").addEventListener("input", (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredFiles = allFiles.filter(file => 
+                    file.name.toLowerCase().includes(searchTerm)
+                );
+                renderFileList(filteredFiles);
+            });
+
+            // Select All button
+            document.getElementById("selectAll").addEventListener("click", () => {
+                // Get visible files (in case search is active)
+                const visibleCheckboxes = document.querySelectorAll(".csv-checkbox");
+                visibleCheckboxes.forEach(checkbox => {
+                    selectedFiles.add(checkbox.value);
+                });
+                updateTags();
+                updateCheckboxes();
+            });
+
+            // Clear All button
+            document.getElementById("clearAll").addEventListener("click", () => {
+                selectedFiles.clear();
+                updateTags();
+                updateCheckboxes();
+            });
+
+            // Confirm selection button
+            document.getElementById("confirmSelection").addEventListener("click", () => {
+                // You can add additional logic here if needed
+                console.log("Selected files:", Array.from(selectedFiles));
+            });
+        }
+
+        // Public function to get selected files (for your form submission)
+        function getSelectedCSVFiles() {
+            return Array.from(selectedFiles);
+        }
+
+        // Public function to set selected files programmatically
+        function setSelectedCSVFiles(fileNames) {
+            selectedFiles = new Set(fileNames);
+            updateTags();
+            updateCheckboxes();
+        }
+
+        // Public function to clear selection
+        function clearCSVSelection() {
+            selectedFiles.clear();
+            updateTags();
+            updateCheckboxes();
+        }
     </script>
 </body>
 </html>

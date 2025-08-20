@@ -1,26 +1,20 @@
-def run_email_sender(template_name="Template_02.html" , allow_duplicates=False, account_number="1"):
-    import os
-    import pandas as pd
-    import smtplib
+def run_email_sender(template_name, csv_files=None, allow_duplicates=False, account_number="1"):
+    import os, pandas as pd, smtplib
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     from dotenv import load_dotenv
+    from datetime import datetime
 
-    logs = []  # Collect messages here
-
+    logs = []
     CSV_FOLDER = "EmailsInfo"
-    SENT_WELCOME_FILE = "Skipped_Emails.txt"  # File to track sent welcome emails
+    EmailsRecord = "static/EmailsRecord.csv"
 
-    load_dotenv()  # Load environment variables from .env
-
-    # Get SMTP settings from environment variables
-    # print(f"Using SMTP settings for account: {account_number}")
+    load_dotenv()
 
     SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 587
     SMTP_USER = os.getenv(f"SMTP_USER_{account_number}")
     SMTP_PASSWORD = os.getenv(f"SMTP_PASSWORD_{account_number}")
-
 
     def send_email_smtp(sender, recipient, subject, html_content):
         msg = MIMEMultipart("alternative")
@@ -33,65 +27,69 @@ def run_email_sender(template_name="Template_02.html" , allow_duplicates=False, 
                 server.starttls()
                 server.login(SMTP_USER, SMTP_PASSWORD)
                 server.sendmail(sender, recipient, msg.as_string())
-            # logs.append(f"✅ Sent to {recipient}")
             return True
         except Exception as e:
             logs.append(f"❌ Error sending to {recipient}: {e}")
             return False
 
-    sent_welcome_emails = set()
-    if template_name == "Template_02.html":
-        if os.path.exists(SENT_WELCOME_FILE):
-            with open(SENT_WELCOME_FILE, "r") as f:
-                sent_welcome_emails = set(line.strip() for line in f if line.strip())
-
     with open(template_name) as f:
         template = f.read()
 
-    csv_files = [f for f in os.listdir(CSV_FOLDER) if f.startswith("GeneratedEmails_") and f.endswith(".csv")]
     if not csv_files:
-        logs.append("❌ No CSV files found.")
-        return logs  # Return logs immediately if no CSV
+        logs.append("❌ No CSV files selected.")
+        return logs
 
-    latest_csv = max(csv_files, key=lambda f: os.path.getmtime(os.path.join(CSV_FOLDER, f)))
-    df = pd.read_csv(os.path.join(CSV_FOLDER, latest_csv))
-
-    # ✅ Remove duplicates if not allowed
-    if not allow_duplicates:
-        df = df.drop_duplicates(subset=['From Email'])
-        
+    total_sent = 0
     new_sent_emails = set()
-    sent_count = 0  # count how many new emails sent
+    records_to_save = []  # collect records for batch save
 
-    for _, row in df.iterrows():
-        name = row['From Name']
-        email = row['From Email']
-
-        if pd.isna(email) or '@' not in email:
+    for csv_file in csv_files:
+        csv_path = os.path.join(CSV_FOLDER, csv_file)
+        if not os.path.exists(csv_path):
+            logs.append(f"❌ CSV not found: {csv_file}")
             continue
 
-        if template_name == "Template_02.html" and email in sent_welcome_emails:
-            logs.append(f"Skipping {email}, Email already sent.")
-            continue
+        df = pd.read_csv(csv_path)
+        if not allow_duplicates:
+            df = df.drop_duplicates(subset=['From Email'])
 
-        personalized_html = template.replace("{From}", name if pd.notna(name) else "")
-        success = send_email_smtp(SMTP_USER, email, f"Welcome to IQTechSolutions, {name}", personalized_html)
+        for _, row in df.iterrows():
+            name = row['From Name']
+            email = row['From Email']
 
-        if success and template_name == "Template_02.html":
-            new_sent_emails.add(email)
-            sent_count += 1
-        elif success:
-            sent_count += 1
+            if pd.isna(email) or '@' not in email:
+                continue
 
-    if sent_count > 0:
-        logs.append(f"✅ Successfully sent {sent_count} new email{'s' if sent_count > 1 else ''}.")
+            personalized_html = template.replace("{From}", name if pd.notna(name) else "")
+            success = send_email_smtp(SMTP_USER, email, f"Welcome to IQTechSolutions, {name}", personalized_html)
+
+            if success:
+                total_sent += 1
+                new_sent_emails.add(email)
+                records_to_save.append([email, os.path.basename(template_name), datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+
+    # Save to EmailsRecord.csv
+    if records_to_save:
+        try:
+            # Load existing file to get last Sr.No
+            if os.path.exists(EmailsRecord):
+                existing_df = pd.read_csv(EmailsRecord)
+                last_srno = existing_df["Sr.No"].max() if not existing_df.empty else 0
+            else:
+                last_srno = 0
+
+            new_df = pd.DataFrame(records_to_save, columns=["Email", "Template", "DateTime"])
+            new_df.insert(0, "Sr.No", range(last_srno + 1, last_srno + 1 + len(new_df)))
+
+            # Append to CSV
+            new_df.to_csv(EmailsRecord, mode="a", header=not os.path.exists(EmailsRecord), index=False)
+            logs.append(f"📌 Records saved to {EmailsRecord}")
+        except Exception as e:
+            logs.append(f"⚠️ Error saving records: {e}")
+
+    if total_sent > 0:
+        logs.append(f"✅ Successfully sent {total_sent} new email(s).")
     else:
-        logs.append("❌ All emails in CSV have already been sent previously.")
+        logs.append("❌ No new emails were sent.")
 
-
-    if new_sent_emails:
-        with open(SENT_WELCOME_FILE, "a") as f:
-            for em in new_sent_emails:
-                f.write(em + "\n")
-
-    return logs  # Return all collected messages
+    return logs

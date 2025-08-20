@@ -75,17 +75,20 @@ def set_account():
 # ======================
 # Email Sending
 # ======================
+
 @app.route("/send_email", methods=["POST"])
 @login_required
 def send_email_api():
     data = request.get_json()
     template = data.get("template_name")
+    csv_files = data.get("csv_files", [])   # ✅ accept multiple csvs
     allow_duplicates = data.get("allow_duplicates", False)
     account_number = session.get("smtp_account", "1")
 
     try:
         logs = run_email_sender(
             template_name=template,
+            csv_files=csv_files,   # ✅ pass to sender
             allow_duplicates=allow_duplicates,
             account_number=account_number
         )
@@ -98,7 +101,7 @@ def send_email_api():
 
     except Exception as e:
         return jsonify({"success": False, "logs": [f"Failed to send emails: {e}"]}), 500
-
+    
 # ======================
 # Generate CSV
 # ======================
