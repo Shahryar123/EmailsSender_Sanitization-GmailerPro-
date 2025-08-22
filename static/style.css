@@ -149,7 +149,7 @@ h1 {
     font-size: 1.1rem;
     border-radius: 12px;
     padding: 12px 0;
-    margin-top: 35px;
+    margin-top: 20px;
     box-shadow: 0 6px 15px rgba(58, 99, 216, 0.5);
     transition: background 0.3s ease;
     display: flex;
@@ -913,4 +913,20 @@ svg.icon {
 
 .success-message.show {
     transform: translateX(0);
+}
+
+.upload-button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 650;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.upload-button:hover {
+    background: linear-gradient(135deg, #556ed1, #5e3ea8);
+    color: white;
 }

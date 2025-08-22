@@ -1,13 +1,15 @@
 from __future__ import print_function
+from email.utils import parsedate_to_datetime
 import os.path
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, time
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 import pandas as pd
+import time
 
 # Gmail API scope (read-only access)
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -116,25 +118,45 @@ def main():
         print(f"⚠️ CATEGORY_PRIMARY not found → using Inbox with query: {search_query}")
 
     # Run query
-    results = service.users().messages().list(
-        userId="me",
-        maxResults=max_results_arg,
-        labelIds=["INBOX"],   # Force only Inbox mails
-        q=search_query
-    ).execute()
+    all_messages = []
+    page_token = None
 
-    messages = results.get('messages', [])
-    print(f"📌 Retrieved {len(messages)} messages")
+    while True:
+        results = service.users().messages().list(
+            userId="me",
+            maxResults=max_results_arg,
+            labelIds=["INBOX"],   # Force only Inbox mails
+            q=search_query,
+            pageToken=page_token
+        ).execute()
+
+        messages = results.get('messages', [])
+        all_messages.extend(messages)
+
+        # Check for more pages
+        page_token = results.get('nextPageToken')
+        if not page_token:
+            break
+
+    if not all_messages:
+        print("⚠️ No messages found.")
+        return  # Stop processing if no messages found
+
+    print(f"📌 Retrieved {len(all_messages)} messages")
 
     email_data = []
-    for msg in messages:
+    PARSE_DATES = False   # set to False for max speed (keeps raw string)
+    start_time = time.time()
+
+    for msg in all_messages:   # use all_messages if you fixed pagination
         try:
             msg_id = msg['id']
             msg_detail = service.users().messages().get(
                 userId='me',
                 id=msg_id,
                 format='metadata',
-                metadataHeaders=['From', 'Subject', 'Date']
+                metadataHeaders=['From', 'Subject', 'Date'],
+                fields="id,payload/headers"
             ).execute()
 
             headers = msg_detail['payload']['headers']
@@ -144,10 +166,19 @@ def main():
 
             from_name, from_email = parse_from_field(from_field)
 
-            try:
-                email_datetime = datetime.strptime(date_field, '%a, %d %b %Y %H:%M:%S %z')
-                email_datetime_str = email_datetime.strftime('%Y-%m-%d %H:%M:%S')
-            except Exception:
+            # ✅ Smarter datetime parsing
+            if PARSE_DATES:
+                try:
+                    email_datetime = parsedate_to_datetime(date_field)
+                    if email_datetime:
+                        email_datetime_str = email_datetime.strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        email_datetime_str = date_field
+                except Exception:
+                    email_datetime_str = date_field
+                    print("⚠️")
+            else:
+                # ⚡ Instant → just keep the raw string
                 email_datetime_str = date_field
 
             email_data.append({
@@ -160,6 +191,12 @@ def main():
         except Exception as e:
             print(f"❌ Failed to parse message {msg}: {e}")
 
+      
+    end_time = time.time()
+    processing_time = end_time - start_time
+    
+    print(f"⏱️ Processed {len(email_data)} emails in {processing_time:.2f} seconds")
+    print(f"📊 Average: {processing_time/len(email_data):.3f} seconds per email")  
     # Save CSV
     try:
         df = pd.DataFrame(email_data)

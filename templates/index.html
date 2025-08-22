@@ -85,7 +85,24 @@
                             <label for="end_date" class="form-label">To Date</label>
                             <input type="date" name="end_date" id="end_date" class="form-control">
                         </div>
-                    </div></br></br>
+                    </div>
+                    <!--Upload CSVs-->
+                    <div class="container mt-4">
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <!-- CSV Button -->
+                            <button type="button" class="btn csvButton">
+                            <i class="fas fa-plus"></i> Browse CSV File
+                            </button>
+                            
+                            <button type="button" class="btn upload-button">
+                            <span style="font-size: 16px;">⬆️ </span>Upload CSV
+                            </button>
+                        </div>
+                        <!-- <form method="POST" action="/upload" enctype="multipart/form-data">
+                            <input type="file" name="file" accept=".csv" required>
+                            <button type="submit">Upload</button>
+                        </form> -->
+                    </div>
                     <button type="button" id="generateCsvBtn" class="btn btn-generate" >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
                             class="bi bi-magic" viewBox="0 0 16 16">
@@ -238,8 +255,7 @@
     <div id="successMessage" class="success-message">
         ✅ Records loaded successfully!
     </div>
-
-    </div>
+</div>
 
 <!-- Preview Modal -->
 <div class="modal fade" id="templatePreviewModal" tabindex="-1" aria-labelledby="templatePreviewLabel" aria-hidden="true">

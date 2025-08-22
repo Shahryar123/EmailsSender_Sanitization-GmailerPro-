@@ -4,6 +4,9 @@ import os
 from flask import Flask, jsonify, render_template, send_from_directory, request, redirect, url_for, flash, session, get_flashed_messages
 import subprocess
 from send_emails import run_email_sender
+import pandas as pd
+from datetime import datetime
+
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key"  # Required for session and flash messages
@@ -151,7 +154,7 @@ def list_csv():
         
         for idx, file in enumerate(csv_files, start=1):
             file_path = os.path.join(CSV_FOLDER, file)
-            created_time = datetime.datetime.fromtimestamp(
+            created_time = datetime.fromtimestamp(
                 os.path.getctime(file_path)
             ).strftime("%Y-%m-%d %H:%M:%S")
             files.append({
@@ -274,6 +277,7 @@ def preview_template(template_name):
 CSV_FILE = os.path.join("static", "EmailsRecord.csv")
 
 @app.route("/api/records")
+@login_required
 def get_records():
     records = []
     if os.path.exists(CSV_FILE):
@@ -282,6 +286,37 @@ def get_records():
             for row in reader:
                 records.append(row)
     return jsonify(records)
+
+
+# ======================
+# Upload CSV
+# ======================
+SAVE_DIR = os.path.join(os.getcwd(), "EmailsInfo")
+os.makedirs(SAVE_DIR, exist_ok=True)
+
+@app.route("/upload", methods=["POST"])
+@login_required
+def upload_file():
+    if "file" not in request.files:
+        return "No file part", 400
+
+    file = request.files["file"]
+
+    if file.filename == "":
+        return "No selected file", 400
+
+    if file and file.filename.endswith(".csv"):
+        # Read uploaded CSV into DataFrame
+        df = pd.read_csv(file)
+
+        # Save with same filename into EmailsInfo folder
+        save_path = os.path.join(SAVE_DIR, file.filename)
+        df.to_csv(save_path, index=False, encoding="utf-8")
+
+        return f"✅ File processed and saved as {save_path}"
+
+    return "Only CSV files are allowed", 400
+
 
 if __name__ == "__main__":
     app.run(debug=True)
