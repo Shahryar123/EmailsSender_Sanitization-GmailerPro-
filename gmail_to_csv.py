@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from datetime import datetime, time
+from flask import session
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -37,7 +38,7 @@ def parse_from_field(from_field):
     return from_field, ""
 
 
-def build_gmail_query(arg_list):
+def build_gmail_query(arg_list,generated):
     """Build Gmail API query based on arguments."""
     if len(arg_list) > 0 and arg_list[0].lower() == "date":
         try:
@@ -46,7 +47,16 @@ def build_gmail_query(arg_list):
             print(f"From Date: {from_date}")
             print(f"To Date: {to_date}")
 
+            if(generated):
+
+                if from_date and to_date:
+                    # Convert YYYY/MM/DD -> DD/MM/YYYY
+                    from_formatted = "/".join(reversed(from_date.split("/")))
+                    to_formatted = "/".join(reversed(to_date.split("/")))
+                    return f"{from_formatted}_to_{to_formatted}"
+                
             return f"after:{from_date} before:{to_date}"
+        
         except Exception as e:
             print(f"Invalid date format. Use YYYY-MM-DD. Error: {e}")
             sys.exit(1)
@@ -126,7 +136,7 @@ def main():
             if len(sys.argv) > 2:
                 account_number = sys.argv[2]
         elif sys.argv[1].lower() == "date":
-            query = build_gmail_query(sys.argv[1:4])
+            query = build_gmail_query(sys.argv[1:4],False)
             max_results_arg = None
             if len(sys.argv) > 4:
                 account_number = sys.argv[4]
@@ -235,11 +245,23 @@ def main():
     end_time = time.time()
     logging.info(f"Processed {len(email_data)} emails in {end_time - start_time:.2f} seconds")
 
+    ACCOUNT_MAP = {
+    "1": "Sales@longislandequipment",
+    "2": "Iqtechconsultancy",
+    "3": "Iqtechsupport",
+    "4": "Muhammadshahryar135"
+    }
+    dates = build_gmail_query(sys.argv[1:4], True)
+    if dates:
+        ACCOUNT_MAP[account_number] += f"_{dates.replace(':','-').replace('/','-').replace(' ','_')}"
+        logging.info(f"Updated account name: {ACCOUNT_MAP[account_number]}")
+
     # Save CSV
     try:
-        df = pd.DataFrame(email_data)
-        now_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        filename = f"EmailsInfo/GeneratedEmails_{now_str}.csv"
+        df = pd.DataFrame(email_data)        
+        account_name = ACCOUNT_MAP.get(account_number, "UnknownAccount")
+
+        filename = f"EmailsInfo/{account_name}.csv"
         df.to_csv(filename, index=False, encoding='utf-8')
         logging.info(f"Saved CSV: {filename} with {len(email_data)} emails")
     except Exception as e:
