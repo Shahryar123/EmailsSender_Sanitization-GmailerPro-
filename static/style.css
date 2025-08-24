@@ -930,3 +930,19 @@ svg.icon {
     background: linear-gradient(135deg, #556ed1, #5e3ea8);
     color: white;
 }
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+.file-input-wrapper input[type=file] {
+    position: absolute;
+    left: -9999px;
+}
+.selected-file {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}

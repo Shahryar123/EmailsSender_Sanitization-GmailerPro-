@@ -1,18 +1,31 @@
 from __future__ import print_function
-from email.utils import parsedate_to_datetime
-import os.path
-import re
-import sys
+
 from datetime import datetime, time
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-import pandas as pd
-import time
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+from google_auth_oauthlib.flow import Flow
+from email.utils import parsedate_to_datetime
+import json , logging, os.path, re, sys, pandas as pd, time, threading
+
 
 # Gmail API scope (read-only access)
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+# Azure Key Vault setup
+KEY_VAULT_URL = "https://akv-test-ca.vault.azure.net/"
+
+credential = DefaultAzureCredential()
+kv_client = SecretClient(vault_url=KEY_VAULT_URL, credential=credential)
+logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.WARNING)
+logging.basicConfig(level=logging.INFO)
+# Cache for Gmail services (avoid authenticating every time)
+_gmail_service_cache = {}
+_creds_cache = {}           # cache credentials JSON per account
+MAX_RETRIES = 3
+RETRY_DELAY = 3  # seconds
 
 def parse_from_field(from_field):
     """Splits the From field into Name and Email."""
@@ -30,14 +43,75 @@ def build_gmail_query(arg_list):
         try:
             from_date = datetime.strptime(arg_list[1], "%Y-%m-%d").strftime("%Y/%m/%d")
             to_date = datetime.strptime(arg_list[2], "%Y-%m-%d").strftime("%Y/%m/%d")
-            print(f"📌 From Date: {from_date}")
-            print(f"📌 To Date: {to_date}")
+            print(f"From Date: {from_date}")
+            print(f"To Date: {to_date}")
 
             return f"after:{from_date} before:{to_date}"
         except Exception as e:
-            print(f"❌ Invalid date format. Use YYYY-MM-DD. Error: {e}")
+            print(f"Invalid date format. Use YYYY-MM-DD. Error: {e}")
             sys.exit(1)
     return ""  # no query means all emails
+
+
+def _load_token_from_kv(account_number):
+    """Fetch token once from Key Vault."""
+    token_secret = kv_client.get_secret(f"TOKEN-ACC-{account_number}")
+    return json.loads(token_secret.value)
+
+
+def _save_token_to_kv_async(account_number, creds):
+    """Save refreshed token to Key Vault (fire-and-forget)."""
+    def _save():
+        try:
+            kv_client.set_secret(f"TOKEN-ACC-{account_number}", creds.to_json())
+            logging.info(f"[KV] Secret updated for account {account_number}")
+        except Exception as e:
+            logging.warning(f"[KV] Failed to update secret for {account_number}: {e}")
+
+    threading.Thread(target=_save, daemon=True).start()
+
+
+def get_gmail_service(account_number):
+    """Retrieve Gmail service with memory cache and resilient Key Vault usage."""
+    global _gmail_service_cache, _creds_cache
+
+    # ✅ If Gmail API service already cached, return it
+    if account_number in _creds_cache and account_number in _gmail_service_cache:
+        logging.info(f"Using cached credentials and service for account {account_number}")
+        return _gmail_service_cache[account_number]
+
+
+    # ✅ Load creds from cache or Key Vault
+    if account_number not in _creds_cache:
+        logging.info(f"Loading credentials for account {account_number} from Key Vault")
+        _creds_cache[account_number] = _load_token_from_kv(account_number)
+
+    creds = Credentials.from_authorized_user_info(_creds_cache[account_number], SCOPES)
+
+    # ✅ Handle refresh if expired
+    if not creds.valid:
+        if creds.expired and creds.refresh_token:
+            logging.warning(f"Credentials expired for account {account_number}, refreshing...")
+            creds.refresh(Request())
+
+            # Update in-memory cache immediately
+            _creds_cache[account_number] = json.loads(creds.to_json())
+
+            # Best-effort save to Key Vault (async, non-blocking)
+            _save_token_to_kv_async(account_number, creds)
+
+            logging.info(f"Refresh successful for account {account_number}")
+        else:
+            logging.error(f"No refresh_token for account {account_number}, re-auth required")
+            raise RuntimeError("No refresh_token available")
+
+    # ✅ Build Gmail API client
+    service = build("gmail", "v1", credentials=creds)
+    _gmail_service_cache[account_number] = service
+    logging.info(f"Gmail API service ready for account {account_number}")
+
+    return service
+
 
 def main():
     query = ""
@@ -66,89 +140,70 @@ def main():
     else:
         max_results_arg = 10
 
-    print(f"Using account {account_number} with max_results={max_results_arg}")
+    logging.info(f"Using account {account_number} with max_results={max_results_arg}")
 
-    # Auth
-    credentials_file = f'GmailAPI_Credentials/credentials_{account_number}.json'
-    token_file = f'token_{account_number}.json'
-    creds = None
-
+    # ✅ Build Gmail API service
     try:
-        if os.path.exists(token_file):
-            creds = Credentials.from_authorized_user_file(token_file, SCOPES)
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(credentials_file, SCOPES)
-                creds = flow.run_local_server(port=0)
-            with open(token_file, 'w') as token:
-                token.write(creds.to_json())
-    except Exception as e:
-        print(f"❌ Authentication failed: {e}")
-        sys.exit(1)
+        service = get_gmail_service(account_number)
+        logging.info("Gmail service built successfully")
+    except Exception as ex:
+        logging.error(f"Failed to build Gmail service: {ex}", exc_info=True)
+        return
 
+    # Fetch labels once
     try:
-        service = build('gmail', 'v1', credentials=creds)
+        labels_resp = service.users().labels().list(userId="me").execute()
+        labels = [lbl["id"] for lbl in labels_resp.get("labels", [])]
+        logging.info(f"Fetched {len(labels)} labels for account {account_number}")
     except Exception as e:
-        print(f"❌ Failed to build Gmail service: {e}")
-        sys.exit(1)
+        logging.error(f"Failed to fetch labels: {e}", exc_info=True)
+        return
 
-   # Fetch labels once
-    labels_resp = service.users().labels().list(userId="me").execute()
-    labels = [lbl["id"] for lbl in labels_resp.get("labels", [])]
-
-    has_primary = "CATEGORY_PRIMARY" in labels  # Workspace won't have this
+    has_primary = "CATEGORY_PRIMARY" in labels
 
     if has_primary:
-        # Personal Gmail → search only Primary
-        if query:
-            search_query = f"category:primary {query}"
-        else:
-            search_query = "category:primary"
-            print(f"📌 Gmail API Query (Primary only): {search_query}")
-
+        search_query = f"category:primary {query}" if query else "category:primary"
+        logging.info(f"Gmail API Query (Primary only): {search_query}")
     else:
-        # Workspace Gmail → fallback to plain Inbox (remove only category:primary, keep the rest)
-        if query:
-            search_query = query.replace("category:primary", "").strip()
-        else:
-            search_query = ""  # if nothing provided, leave empty
-        
-        print(f"⚠️ CATEGORY_PRIMARY not found → using Inbox with query: {search_query}")
+        search_query = query.replace("category:primary", "").strip() if query else ""
+        logging.warning(f"CATEGORY_PRIMARY not found → using Inbox with query: {search_query}")
 
     # Run query
     all_messages = []
     page_token = None
 
-    while True:
-        results = service.users().messages().list(
-            userId="me",
-            maxResults=max_results_arg,
-            labelIds=["INBOX"],   # Force only Inbox mails
-            q=search_query,
-            pageToken=page_token
-        ).execute()
+    try:
+        while True:
+            results = service.users().messages().list(
+                userId="me",
+                maxResults=max_results_arg,
+                labelIds=["INBOX"],
+                q=search_query,
+                pageToken=page_token
+            ).execute()
 
-        messages = results.get('messages', [])
-        all_messages.extend(messages)
+            messages = results.get('messages', [])
+            all_messages.extend(messages)
+            page_token = results.get('nextPageToken')
+            if not page_token:
+                break
 
-        # Check for more pages
-        page_token = results.get('nextPageToken')
-        if not page_token:
-            break
+        logging.info(f"Retrieved {len(all_messages)} messages")
+    except Exception as e:
+        logging.error(f"Failed to fetch messages: {e}", exc_info=True)
+        return
 
     if not all_messages:
-        print("⚠️ No messages found.")
-        return  # Stop processing if no messages found
+        print("No messages found")  # This will be captured by stdout
+        logging.warning("No messages found")
+        sys.exit(0)  # or exit with a specific code if you want
 
-    print(f"📌 Retrieved {len(all_messages)} messages")
-
+    # Process emails
     email_data = []
-    PARSE_DATES = False   # set to False for max speed (keeps raw string)
+    PARSE_DATES = False
     start_time = time.time()
 
-    for msg in all_messages:   # use all_messages if you fixed pagination
+    for msg in all_messages:
         try:
             msg_id = msg['id']
             msg_detail = service.users().messages().get(
@@ -165,21 +220,7 @@ def main():
             date_field = next((h['value'] for h in headers if h['name'] == 'Date'), "")
 
             from_name, from_email = parse_from_field(from_field)
-
-            # ✅ Smarter datetime parsing
-            if PARSE_DATES:
-                try:
-                    email_datetime = parsedate_to_datetime(date_field)
-                    if email_datetime:
-                        email_datetime_str = email_datetime.strftime('%Y-%m-%d %H:%M:%S')
-                    else:
-                        email_datetime_str = date_field
-                except Exception:
-                    email_datetime_str = date_field
-                    print("⚠️")
-            else:
-                # ⚡ Instant → just keep the raw string
-                email_datetime_str = date_field
+            email_datetime_str = date_field if not PARSE_DATES else parsedate_to_datetime(date_field).strftime('%Y-%m-%d %H:%M:%S')
 
             email_data.append({
                 'ID': msg_id,
@@ -189,23 +230,20 @@ def main():
                 'DateTime Received': email_datetime_str
             })
         except Exception as e:
-            print(f"❌ Failed to parse message {msg}: {e}")
+            logging.error(f"Failed to parse message {msg}", exc_info=True)
 
-      
     end_time = time.time()
-    processing_time = end_time - start_time
-    
-    print(f"⏱️ Processed {len(email_data)} emails in {processing_time:.2f} seconds")
-    print(f"📊 Average: {processing_time/len(email_data):.3f} seconds per email")  
+    logging.info(f"Processed {len(email_data)} emails in {end_time - start_time:.2f} seconds")
+
     # Save CSV
     try:
         df = pd.DataFrame(email_data)
         now_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         filename = f"EmailsInfo/GeneratedEmails_{now_str}.csv"
         df.to_csv(filename, index=False, encoding='utf-8')
-        print(f"✅ Saved {filename} with {len(email_data)} emails.")
+        logging.info(f"Saved CSV: {filename} with {len(email_data)} emails")
     except Exception as e:
-        print(f"❌ Failed to save CSV: {e}")
+        logging.error(f"Failed to save CSV: {e}", exc_info=True)
 
 if __name__ == '__main__':
     main()
