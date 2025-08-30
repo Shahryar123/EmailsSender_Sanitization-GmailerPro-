@@ -7,3 +7,4 @@ google-auth-oauthlib
 gunicorn
 azure-identity 
 azure-keyvault-secrets
+azure-storage-blob

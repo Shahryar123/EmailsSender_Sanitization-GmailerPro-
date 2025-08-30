@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from datetime import datetime, time
+from dotenv import load_dotenv
 from flask import session
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -11,7 +12,9 @@ from azure.keyvault.secrets import SecretClient
 from google_auth_oauthlib.flow import Flow
 from email.utils import parsedate_to_datetime
 import json , logging, os.path, re, sys, pandas as pd, time, threading
-
+from azure_storage import container_client
+import io
+import os
 
 # Gmail API scope (read-only access)
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -27,6 +30,7 @@ _gmail_service_cache = {}
 _creds_cache = {}           # cache credentials JSON per account
 MAX_RETRIES = 3
 RETRY_DELAY = 3  # seconds
+
 
 def parse_from_field(from_field):
     """Splits the From field into Name and Email."""
@@ -102,15 +106,18 @@ def get_gmail_service(account_number):
     if not creds.valid:
         if creds.expired and creds.refresh_token:
             logging.warning(f"Credentials expired for account {account_number}, refreshing...")
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+                # Update in-memory cache immediately
+                _creds_cache[account_number] = json.loads(creds.to_json())
 
-            # Update in-memory cache immediately
-            _creds_cache[account_number] = json.loads(creds.to_json())
-
-            # Best-effort save to Key Vault (async, non-blocking)
-            _save_token_to_kv_async(account_number, creds)
-
-            logging.info(f"Refresh successful for account {account_number}")
+                # Best-effort save to Key Vault (async, non-blocking)
+                _save_token_to_kv_async(account_number, creds)
+                logging.info(f"Refresh successful for account {account_number}")
+            except Exception as e:
+                raise RuntimeError("Gmail Account Token Expired")
+            
+ 
         else:
             logging.error(f"No refresh_token for account {account_number}, re-auth required")
             raise RuntimeError("No refresh_token available")
@@ -123,6 +130,28 @@ def get_gmail_service(account_number):
     return service
 
 
+def save_emails_to_csv(email_data, account_name):
+    try:
+        df = pd.DataFrame(email_data)        
+
+        # File name in blob storage
+        filename = f"{account_name}.csv"
+
+        # Convert DataFrame to CSV in memory
+        csv_buffer = io.StringIO()
+        df.to_csv(csv_buffer, index=False, encoding="utf-8")
+
+        # Upload to Azure Blob
+        blob_client = container_client.get_blob_client(filename)
+        blob_client.upload_blob(csv_buffer.getvalue(), overwrite=True)
+
+        logging.info(f"✅ Uploaded CSV to Blob: {filename} with {len(email_data)} emails")
+        return blob_client.url  # Return blob URL if you want to show it in UI
+
+    except Exception as e:
+        logging.error(f"❌ Failed to upload CSV: {e}", exc_info=True)
+        return None
+    
 def main():
     query = ""
     max_results_arg = None
@@ -253,19 +282,15 @@ def main():
     }
     dates = build_gmail_query(sys.argv[1:4], True)
     if dates:
-        ACCOUNT_MAP[account_number] += f"_{dates.replace(':','-').replace('/','-').replace(' ','_')}"
-        logging.info(f"Updated account name: {ACCOUNT_MAP[account_number]}")
+        account_name = ACCOUNT_MAP.get(account_number, "UnknownAccount") + f"_{dates.replace(':','-').replace('/','-').replace(' ','_')}"
+        logging.info(f"Account name without date: {account_name}")
 
-    # Save CSV
-    try:
-        df = pd.DataFrame(email_data)        
-        account_name = ACCOUNT_MAP.get(account_number, "UnknownAccount")
+    else:
+        account_name = ACCOUNT_MAP.get(account_number, "UnknownAccount") + datetime.now().strftime("_%d-%m-%Y_%H:%M:%S")
+        logging.info(f"Account name without date: {account_name}")
 
-        filename = f"EmailsInfo/{account_name}.csv"
-        df.to_csv(filename, index=False, encoding='utf-8')
-        logging.info(f"Saved CSV: {filename} with {len(email_data)} emails")
-    except Exception as e:
-        logging.error(f"Failed to save CSV: {e}", exc_info=True)
+    
+    url = save_emails_to_csv(email_data, account_name)
 
 if __name__ == '__main__':
     main()

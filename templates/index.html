@@ -583,6 +583,15 @@ function showToast(message, icon) {
             }).then(() => {
                 window.location.href = "/gmail/auth"; // redirect to auth
             })
+        } else if (data.token_expired===true) {
+            Swal.fire({
+                title: "Authentication Required",
+                text: "⚠️ Gmail token expired. Please re-authenticate your account.",
+                icon: "warning",
+                confirmButtonText: "Re-Authenticate"
+            }).then(() => {
+                window.location.href = "/gmail/auth"; // redirect to auth
+            })
         } else {
             Swal.fire("Error!", data.message, "error");
         }
@@ -1284,27 +1293,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Handle file selection
-        csvFile.addEventListener('change', function() {
-            console.log('File selection changed');
-            if (this.files && this.files[0]) {
-                const file = this.files[0];
-                console.log('Selected file:', file.name);
-                
-                // Check if it's a CSV file
-                if (file.name.toLowerCase().endsWith('.csv')) {
-                    fileName.textContent = file.name;
-                    selectedFile.style.display = 'block';
-                    uploadBtn.disabled = false;
-                    generateCsvBtn.disabled = true; // Disable generate button when file is selected
-                    uploadStatus.innerHTML = '';
-                } else {
-                    alert('Please select a CSV file only.');
-                    clearSelectedFile();
-                }
+        csvFile.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            console.log('Selected file:', file.name);
+
+            // Check if it's a CSV file
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                fileName.textContent = file.name;
+                selectedFile.style.display = 'block';
+                uploadBtn.disabled = false;
+                generateCsvBtn.disabled = true; // Disable generate button when file is selected
+                uploadStatus.innerHTML = '';
             } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid File',
+                    text: 'Please select a CSV file only!',
+                    confirmButtonText: 'OK'
+                });
                 clearSelectedFile();
             }
+        } else {
+            clearSelectedFile();
+        }
         });
+
 
         // Handle remove file button
         removeFileBtn.addEventListener('click', function() {
@@ -1317,7 +1331,11 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log('Upload button clicked');
             const file = csvFile.files[0];
             if (!file) {
-                alert('Please select a file first.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No File Selected',
+                    text: 'Please select a file first.'
+                });
                 return;
             }
 
@@ -1327,51 +1345,65 @@ document.addEventListener("DOMContentLoaded", () => {
             // Show loading state
             uploadBtn.disabled = true;
             uploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
-            
-            const loadingMessage = '<div class="alert alert-info">Uploading file...</div>';
-            uploadStatus.innerHTML = loadingMessage;
-            console.log('Set loading message:', loadingMessage);
+            uploadStatus.innerHTML = '<div class="alert alert-info">Uploading file...</div>';
 
             // Send file to server
             fetch('/upload', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                console.log('Response received:', response.status, response.statusText);
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        console.log('Error response text:', text);
-                        return Promise.reject(text);
-                    });
-                }
-                return response.text();
-            })
+            .then(response => response.json())  // ✅ always parse as JSON
             .then(data => {
-                console.log('Success response data:', data);
-                const successMessage = '<div class="alert alert-success">' + data + '</div>';
-                uploadStatus.innerHTML = successMessage;
-                console.log('Set success message:', successMessage);
-                
-                // Reset form but keep the status message
-                clearSelectedFile(true); // Pass true to keep status
-                uploadBtn.innerHTML = '<span style="font-size: 16px;">⬆️ </span>Upload CSV';
-                
-                // Optional: Clear the success message after 5 seconds
-                setTimeout(() => {
+                console.log('Upload response:', data);
+
+                if (data.status === "success") {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Upload Successful',
+                        text: data.message,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+
+                    clearSelectedFile(true);
+                    uploadBtn.innerHTML = '<span style="font-size: 16px;">⬆️ </span>Upload CSV';
+                    uploadStatus.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+
+                } else if (data.status === "exists") {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'File Already Exists',
+                        text: data.message
+                    });
+
+                    clearSelectedFile();
+                    uploadBtn.innerHTML = '<span style="font-size: 16px;">⬆️ </span>Upload CSV';
                     uploadStatus.innerHTML = '';
-                }, 5000);
+                    uploadBtn.disabled = false;
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Upload Failed',
+                        text: data.message || "Something went wrong"
+                    });
+
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<span style="font-size: 16px;">⬆️ </span>Upload CSV';
+                }
             })
-            .catch(error => {
-                console.log('Error caught:', error);
-                const errorMessage = '<div class="alert alert-danger">Error: ' + error + '</div>';
-                uploadStatus.innerHTML = errorMessage;
-                console.log('Set error message:', errorMessage);
-                generateCsvBtn.disabled = true; // Keep generate button disabled on error
+            .catch(err => {
+                console.error("Error caught:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Unexpected Error',
+                    text: err
+                });
                 uploadBtn.disabled = false;
                 uploadBtn.innerHTML = '<span style="font-size: 16px;">⬆️ </span>Upload CSV';
             });
         });
+
     </script>
 </body>
 </html>

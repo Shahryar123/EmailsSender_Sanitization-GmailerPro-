@@ -1,6 +1,5 @@
 .env
 /GmailAPI_Credentials/
-/EmailsInfo/
 token_1.json
 token_2.json
 token_3.json

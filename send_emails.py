@@ -1,15 +1,14 @@
 def run_email_sender(template_name, csv_files=None, allow_duplicates=False, account_number="1"):
-    import os, pandas as pd, smtplib
+    import os, pandas as pd, smtplib, io
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     from dotenv import load_dotenv
     from datetime import datetime
+    from azure_storage import container_client
 
     logs = []
-    CSV_FOLDER = "EmailsInfo"
     EmailsRecord = "static/EmailsRecord.csv"
-
-    load_dotenv()
+    
 
     SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 587
@@ -43,13 +42,25 @@ def run_email_sender(template_name, csv_files=None, allow_duplicates=False, acco
     new_sent_emails = set()
     records_to_save = []  # collect records for batch save
 
+    
     for csv_file in csv_files:
-        csv_path = os.path.join(CSV_FOLDER, csv_file)
-        if not os.path.exists(csv_path):
-            logs.append(f"❌ CSV not found: {csv_file}")
+        try:
+            # Get blob client for this file
+            blob_client = container_client.get_blob_client(csv_file)
+
+            # Check if file exists in blob
+            if not blob_client.exists():
+                logs.append(f"❌ CSV not found in Azure Blob Storage: {csv_file}")
+                continue
+
+            # Download blob content into memory
+            download_stream = blob_client.download_blob()
+            df = pd.read_csv(io.StringIO(download_stream.content_as_text()))
+
+        except Exception as e:
+            logs.append(f"❌ Error reading {csv_file} from Azure Blob: {str(e)}")
             continue
 
-        df = pd.read_csv(csv_path)
         if not allow_duplicates:
             df = df.drop_duplicates(subset=['From Email'])
 
@@ -61,13 +72,21 @@ def run_email_sender(template_name, csv_files=None, allow_duplicates=False, acco
                 continue
 
             personalized_html = template.replace("{From}", name if pd.notna(name) else "")
-            success = send_email_smtp(SMTP_USER, email, f"Welcome to IQTechSolutions, {name}", personalized_html)
+            success = send_email_smtp(
+                SMTP_USER,
+                email,
+                f"Welcome to IQTechSolutions, {name}",
+                personalized_html
+            )
 
             if success:
                 total_sent += 1
                 new_sent_emails.add(email)
-                records_to_save.append([email, os.path.basename(template_name), datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
-
+                records_to_save.append([
+                    email,
+                    os.path.basename(template_name),
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                ])
     # Save to EmailsRecord.csv
     if records_to_save:
         try:
