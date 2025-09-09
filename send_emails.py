@@ -15,6 +15,40 @@ def run_email_sender(template_name, csv_files=None, allow_duplicates=False, acco
     SMTP_USER = os.getenv(f"SMTP_USER_{account_number}")
     SMTP_PASSWORD = os.getenv(f"SMTP_PASSWORD_{account_number}")
 
+    # =======================================================
+    # ================== Hostinger CPanel ===================
+    # =======================================================
+
+    cpanel_user = os.getenv("CPANEL_USER", "info@iqtechsolutions.co.uk")
+    cpanel_password = os.getenv("CPANEL_PASSWORD")
+    server = "smtp.titan.email"
+    port = 465
+    use_ssl = True
+
+    def send_email_hostinger(sender, recipient, subject, html_content):
+        msg = MIMEMultipart("alternative")
+        msg["From"] = sender
+        msg["To"] = recipient
+        msg["Subject"] = subject
+        msg.attach(MIMEText(html_content, "html"))
+        try:
+            if use_ssl:
+                with smtplib.SMTP_SSL(server, port) as server_conn:
+                    server_conn.login(sender, cpanel_password)
+                    server_conn.sendmail(sender, recipient, msg.as_string())
+            else:
+                with smtplib.SMTP(server, port) as server_conn:
+                    server_conn.starttls()
+                    server_conn.login(sender, cpanel_password)
+                    server_conn.sendmail(sender, recipient, msg.as_string())
+            return True
+        except Exception as e:
+            logs.append(f"❌ Error sending to {recipient}: {e}")
+            return False
+        
+    
+    # ========================================================
+
     def send_email_smtp(sender, recipient, subject, html_content):
         msg = MIMEMultipart("alternative")
         msg["From"] = sender
@@ -72,12 +106,20 @@ def run_email_sender(template_name, csv_files=None, allow_duplicates=False, acco
                 continue
 
             personalized_html = template.replace("{From}", name if pd.notna(name) else "")
-            success = send_email_smtp(
-                SMTP_USER,
-                email,
-                f"Welcome to IQTechSolutions, {name}",
-                personalized_html
-            )
+            if account_number == "5":  # Use Hostinger SMTP
+                success = send_email_hostinger(
+                    cpanel_user,
+                    email,
+                    f"Welcome to IQTechSolutions, {name}",
+                    personalized_html
+                )
+            else:
+                success = send_email_smtp(
+                    SMTP_USER,
+                    email,
+                    f"Welcome to IQTechSolutions, {name}",
+                    personalized_html
+                )
 
             if success:
                 total_sent += 1

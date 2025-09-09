@@ -36,7 +36,7 @@
         <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">Email Automation</h1>
         <p class="subtitle">Streamline your email campaigns with our advanced automation platform. Generate targeted lists and send beautiful emails effortlessly.</p>
 
-        <div class="card">
+        <!-- <div class="card">
             <div class="card-icon-acc" aria-hidden="true">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0 0 48 48">
                 <path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"></path><path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"></path><polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"></polygon><path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C9.132,8.301,8.228,8,7.298,8h0C4.924,8,3,9.924,3,12.298z"></path><path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341C38.868,8.301,39.772,8,40.702,8h0 C43.076,8,45,9.924,45,12.298z"></path>
@@ -52,7 +52,7 @@
                         <option value="4" {% if session.get('smtp_account', '1') == '4' %}selected{% endif %}>🥉 muhammadshahryar135@gmail.com</option>
                     </select>
             </form>
-        </div>
+        </div> -->
 
         </br>
         <div class="cards-row">
@@ -65,7 +65,16 @@
                 </div>
                 <h3>Generate CSV</h3>
                 <form method="post" class="mb-0">
-                        <label for="email_option" class="form-label">Select Option</label>
+                    <label for="smtp_account" class="form-label">Select Gmail Account</label>
+                    <select id="smtp_account" name="smtp_account" class="form-select">
+                        <option value="1">🥇 sales@longislandequipment.com</option>
+                        <option value="2">🥈 iqtechconsultancy@gmail.com</option>
+                        <option value="3">🥉 iqtechsupport@gmail.com</option>
+                        <option value="4">🥉 muhammadshahryar135@gmail.com</option>
+                        <option value="5">🥉 info@iqtechsolutions.co.uk</option>
+                    </select>
+                    
+                    <label for="email_option" class="form-label">Select Option</label>
                     <div class="d-flex align-items-center">
                         <select name="email_option" id="email_option" class="form-select" aria-label="Select Option">
                             <option value="all" selected>📨 All Emails</option>
@@ -140,7 +149,15 @@
                 </div>
                 <h3>Send Emails</h3>
                 <form id="emailCardForm" method="post" class="mb-0">
-                    <input type="hidden" name="num_emails" value="{{ last_num_emails }}">
+                    <label for="smtp_account_email" class="form-label">Select Gmail Account</label>
+                    <select id="smtp_account_email" name="smtp_account_email" class="form-select">
+                        <option value="1">🥇 sales@longislandequipment.com</option>
+                        <option value="2">🥈 iqtechconsultancy@gmail.com</option>
+                        <option value="3">🥉 iqtechsupport@gmail.com</option>
+                        <option value="4">🥉 muhammadshahryar135@gmail.com</option>
+                        <option value="5">🥉 info@iqtechsolutions.co.uk</option>
+                    </select>
+                    <!-- <input type="hidden" name="num_emails" value="{{ last_num_emails }}"> -->
                     <label for="template_name" class="form-label">Email Template</label>
                     
                     <div class="d-flex align-items-center">
@@ -548,7 +565,8 @@ function showToast(message, icon) {
     const emailOption = document.getElementById("email_option").value;
     const startDate = document.getElementById("start_date").value;
     const endDate = document.getElementById("end_date").value;
-
+    const smtpAccount = document.getElementById("smtp_account").value;
+    console.log("SMTP Account:", smtpAccount);
     Swal.fire({
         title: "Generating CSV...",
         text: "Please wait while your CSV is being created.",
@@ -564,7 +582,8 @@ function showToast(message, icon) {
         body: JSON.stringify({
             email_option: emailOption,
             start_date: startDate,
-            end_date: endDate
+            end_date: endDate,
+            smtp_account: smtpAccount
         })
     })
     .then(response => response.json())
@@ -575,6 +594,7 @@ function showToast(message, icon) {
             Swal.fire("Success!", data.message, "success");
             document.getElementById("showBtn").click(); // refresh file list
         } else if (data.auth_required) {
+                    
             Swal.fire({
                 title: "Authentication Required",
                 text: "Please authenticate Gmail before generating CSV.",
@@ -584,13 +604,16 @@ function showToast(message, icon) {
                 window.location.href = "/gmail/auth"; // redirect to auth
             })
         } else if (data.token_expired===true) {
+            
+            const smtpAccount = document.getElementById("smtp_account").value;
+            console.log("SMTP Account:", smtpAccount);
             Swal.fire({
                 title: "Authentication Required",
                 text: "⚠️ Gmail token expired. Please re-authenticate your account.",
                 icon: "warning",
                 confirmButtonText: "Re-Authenticate"
             }).then(() => {
-                window.location.href = "/gmail/auth"; // redirect to auth
+                window.location.href = `/gmail/auth?account=${smtpAccount}`; // redirect to auth with account
             })
         } else {
             Swal.fire("Error!", data.message, "error");
@@ -664,6 +687,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const checkboxes = document.querySelectorAll('#csvFileList input[type="checkbox"]:checked');
         const selectedItems = Array.from(checkboxes).map(cb => cb.value);
 
+        const smtp_account = document.getElementById("smtp_account_email").value;
+        //console.log("SMTP Account:", smtp_account);
+
         //console.log("Checked boxes:", selectedItems);
 
         if (selectedItems.length === 0) {
@@ -684,9 +710,11 @@ document.addEventListener("DOMContentLoaded", () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+                smtp_account: smtp_account,  // ✅ include SMTP account
                 template_name: template,
                 allow_duplicates: allowDuplicates,
                 csv_files: selectedItems   // ✅ match Flask app.py
+                
             })
         })
         .then(response => response.json())

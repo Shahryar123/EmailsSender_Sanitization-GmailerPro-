@@ -22,6 +22,8 @@ app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 app.secret_key = "super_secret_key"  # Required for session and flash messages
+import os
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 
 # 🔹 Key Vault setup
@@ -104,10 +106,13 @@ def set_account():
 @login_required
 def send_email_api():
     data = request.get_json()
+    print(f"Data received for sending email: {data}")
     template = data.get("template_name")
     csv_files = data.get("csv_files", [])   # ✅ accept multiple csvs
     allow_duplicates = data.get("allow_duplicates", False)
-    account_number = session.get("smtp_account", "1")
+    account_number = data.get("smtp_account", "1")  # default to 1
+
+    print(f"Account Number Selected in send Email: {account_number}")
 
     try:
         logs = run_email_sender(
@@ -173,10 +178,12 @@ def upload_file():
 @login_required
 def generate_csv():
     data = request.get_json()
+    # print(f"Data received for CSV generation: {data}")
     email_option = data.get("email_option")
     start_date = data.get("start_date")
     end_date = data.get("end_date")
-    account_number = session.get("smtp_account", "1")
+    account_number = data.get("smtp_account", "1")  # default to 1
+    print(f"Account Number Selected in generate csv: {account_number}")
 
     try:
         # ✅ Check if Gmail authentication works before doing CSV
@@ -191,7 +198,6 @@ def generate_csv():
                     result = subprocess.run(
                         ["python", "gmail_to_csv.py", "date", start_date, end_date, account_number],
                         check=True,
-                        capture_output=True,  # capture stdout and stderr
                         text=True  
                     )
                     
@@ -236,7 +242,8 @@ def generate_csv():
 
             else:
                 logging.info("Generating CSV for all emails")
-                
+                print("Starting email extraction....")
+            
                 try:
                     result = subprocess.run(
                         ["python", "gmail_to_csv.py", "all", account_number],
@@ -468,7 +475,7 @@ def get_records():
 def get_redirect_uri():
     if "localhost" in request.host or "127.0.0.1" in request.host:
         print("Running in local environment")
-        return url_for("gmail_oauth2callback", _external=True)
+        return url_for("gmail_oauth2callback", _external=True , _scheme="http")
     else:
         print("Running in deployed environment")
         return url_for("gmail_oauth2callback", _external=True, _scheme="https")
@@ -476,7 +483,8 @@ def get_redirect_uri():
 @app.route("/gmail/auth")
 @login_required
 def gmail_auth():
-    account_number = session.get("smtp_account", "1")
+    account_number = request.args.get("account", "1")
+    print(f"Account Number Selected in gmail auth: {account_number}")
     CREDENTIALS_SECRET_NAME = f"CREDENTIALS-{account_number}"
 
     print(f"Attempting to retrieve credentials from Key Vault Account Number {account_number}...")
@@ -499,7 +507,8 @@ def gmail_auth():
     auth_url, _ = flow.authorization_url(
         access_type="offline",
         include_granted_scopes="true",
-        prompt="consent"
+        prompt="consent",
+        state=account_number  # 👈 carry account number here
     )
     return redirect(auth_url)
 
@@ -508,7 +517,8 @@ def gmail_auth():
 @login_required
 def gmail_oauth2callback():
     # Directly generate CSV with stored parameters
-    account_number = session.get("smtp_account", "1")
+    account_number = request.args.get("state", "1")  # 👈 get account number from state
+    print(f"Account Number Selected in oauth2callback: {account_number}")
     TOKEN_SECRET_NAME = f"TOKEN-ACC-{account_number}"
     CREDENTIALS_SECRET_NAME = f"CREDENTIALS-{account_number}"
 
