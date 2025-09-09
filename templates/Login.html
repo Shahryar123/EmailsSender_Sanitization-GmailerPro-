@@ -127,6 +127,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      transition: all 0.5s ease;
     }
 
     .testimonial h2 {
@@ -231,6 +232,97 @@
       color: #fff;
     }
 
+    /* Registration form styles for right side */
+    .register-form {
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
+    }
+
+    .register-form.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .register-form h2 {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .register-form p {
+      color: #ccc;
+      margin-bottom: 25px;
+    }
+
+    .register-form label {
+      font-size: 14px;
+      margin-bottom: 5px;
+      display: block;
+      color: white;
+    }
+
+    .register-form input {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .register-form .password-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .register-form .password-wrapper input {
+      width: 100%;
+      padding: 12px 50px 12px 18px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      margin-bottom: 0;
+    }
+
+    .register-form button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 30px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(to right, #10b981, #059669);
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .register-form .back-to-login {
+      text-align: center;
+      color: #f9a8d4;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .testimonial-content {
+      transition: all 0.5s ease;
+    }
+
+    .testimonial-content.fade-out {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+
     /* Responsive */
     @media(max-width: 768px) {
       .container {
@@ -298,29 +390,76 @@
 
             <div class="options">
                 <label><input type="checkbox"> Keep me logged in</label>
-                <a href="#">Forgot Password?</a>
+                <a href="#" onclick="showForgotPasswordForm()">Forgot Password?</a>
             </div>
 
             <!-- Use type="submit" so it POSTs to Flask -->
             <button type="submit" class="signin">Sign in</button>
+            <p style="text-align: center;">Don't have an account? <a href="#" onclick="showRegisterForm()" style="color: #f9a8d4;">Sign Up</a></p>
         </form>
     </div>
 
     <!-- Right Section -->
     <div class="right">
-      <div class="testimonial">
-        <h2>Email Automation System.</h2>
-        <p class="quote">
-          "Seamlessly extract emails from Gmail, generate CSV files, and send personalized email templates to users."
-        </p>
-        </br>
-        <p style="margin-bottom: 6px;">Designed By</p>
-        <p class="author">IQTechSolutions</p>
+      <!-- Original testimonial content -->
+      <div class="testimonial-content" id="testimonialContent">
+        <div class="testimonial">
+          <h2>Email Automation System.</h2>
+          <p class="quote">
+            "Seamlessly extract emails from Gmail, generate CSV files, and send personalized email templates to users."
+          </p>
+          </br>
+          <p style="margin-bottom: 6px;">Designed By</p>
+          <p class="author">IQTechSolutions</p>
+        </div>
+
+        <div class="card">
+          <h3>🔏 Secure access to your dashboard</h3>
+          <p>Be among the first users to experience the easiest way to start marketing using Email Extraction.</p>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>🔏 Secure access to your dashboard</h3>
-        <p>Be among the first users to experience the easiest way to start marketing using Email Extraction.</p>
+      <!-- Registration form (hidden by default) -->
+      <div class="register-form" id="registerForm">
+        <h2>Create Account ✨</h2>
+        <p>Join us and start your email automation journey</p>
+        
+        <form method="POST" action="/register">
+          <label>Full Name</label>
+          <input type="text" name="fullname" placeholder="John Doe" required>
+
+          <label>Email</label>
+          <input type="email" name="email" placeholder="johndoe@gmail.com" required>
+
+          <label>Password</label>
+          <div class="password-wrapper">
+            <input type="password" name="password" id="registerPassword" placeholder="••••••••" required>
+            <span class="toggle-password" onclick="toggleRegisterPassword()" id="registerToggleIcon">🙈</span>
+          </div>
+
+          <button type="submit">Create Account</button>
+          <a href="#" class="back-to-login" onclick="showLoginForm()">Already have an account? Sign In</a>
+        </form>
+      </div>
+      <!-- Forgot Password form (hidden by default) -->
+      <div class="register-form" id="forgotForm">
+        <h2>Reset Password 🔒</h2>
+        <p>Enter your username and set a new password</p>
+        
+        <form method="POST" action="/forgot-password">
+          <label>Username (Email)</label>
+          <input type="email" name="username" placeholder="johndoe@gmail.com" required>
+
+          <label>New Password</label>
+          <div class="password-wrapper">
+            <input type="password" name="newpassword" id="forgotPassword" placeholder="••••••••" required>
+            <span class="toggle-password" onclick="toggleForgotPassword()" id="forgotToggleIcon">🙈</span>
+          </div>
+
+          <button type="submit">Update Password</button>
+          <a href="#" class="back-to-login" onclick="showLoginForm()">Back to Login</a>
+        </form>
+
       </div>
     </div>
 
@@ -333,28 +472,195 @@
       
       if (passwordInput.type === "password") {
         passwordInput.type = "text";
-        toggleIcon.textContent = "👁️"; // Eye with hand (hiding)
+        toggleIcon.textContent = "👁️";
       } else {
         passwordInput.type = "password";
-        toggleIcon.textContent = "🙈"; // Open eye
+        toggleIcon.textContent = "🙈";
       }
     }
-      // Show SweetAlert messages from Flask
-    document.addEventListener('DOMContentLoaded', () => {
-      const flashMessages = JSON.parse('{{ get_flashed_messages(with_categories=true) | tojson | safe }}');
-      if (Array.isArray(flashMessages) && flashMessages.length) {
-        flashMessages.forEach(([category, message]) => {
-          Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: category === 'success' ? 'success' : 'error',
-            title: message,
-            showConfirmButton: false,
-            timer: 3000
-          });
-        });
+
+    function toggleRegisterPassword() {
+      const passwordInput = document.getElementById("registerPassword");
+      const toggleIcon = document.getElementById("registerToggleIcon");
+      
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleIcon.textContent = "👁️";
+      } else {
+        passwordInput.type = "password";
+        toggleIcon.textContent = "🙈";
       }
-    });
+    }
+
+    function showRegisterForm() {
+      const testimonialContent = document.getElementById("testimonialContent");
+      const registerForm = document.getElementById("registerForm");
+      const forgotForm = document.getElementById("forgotForm");
+
+      // Reset others
+      testimonialContent.classList.add("fade-out");
+      forgotForm.classList.remove("active");
+
+      setTimeout(() => {
+        testimonialContent.style.display = "none";
+        forgotForm.style.display = "none";
+        registerForm.classList.add("active");
+        registerForm.style.display = "flex";
+      }, 300);
+    }
+
+
+    function showLoginForm() {
+      const testimonialContent = document.getElementById("testimonialContent");
+      const registerForm = document.getElementById("registerForm");
+      const forgotForm = document.getElementById("forgotForm");
+
+      registerForm.classList.remove("active");
+      forgotForm.classList.remove("active");
+
+      setTimeout(() => {
+        registerForm.style.display = "none";
+        forgotForm.style.display = "none";
+        testimonialContent.style.display = "block";
+        testimonialContent.classList.remove("fade-out");
+      }, 350);
+    }
+
+
+    function handleForgotPasswordSubmit(event) {
+      // Show loading state
+      const submitButton = event.target.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.textContent = 'Sending Reset Link...';
+      submitButton.disabled = true;
+      
+      // Transform back to login view after a short delay
+      setTimeout(() => {
+        showLoginForm();
+        
+        // Reset button state
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+        
+        // Clear the form
+        event.target.reset();
+        
+        // Show success message
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'info',
+          title: 'Password reset link sent to your email!',
+          showConfirmButton: false,
+          timer: 3000
+        });
+      }, 1500);
+      
+      // Note: In a real application, you would handle the actual form submission here
+      // Remove the next line if you want the form to actually submit to your Flask backend
+      event.preventDefault();
+    }
+
+    function handleRegisterSubmit(event) {
+      // Show loading state or success message
+      const submitButton = event.target.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.textContent = 'Creating Account...';
+      submitButton.disabled = true;
+      
+      // Transform back to login view after a short delay
+      setTimeout(() => {
+        showLoginForm();
+        
+        // Reset button state
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+        
+        // Clear the form
+        event.target.reset();
+        
+        // Show success message
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Account created successfully! Please sign in.',
+          showConfirmButton: false,
+          timer: 3000
+        });
+      }, 1500);
+      
+      // Note: In a real application, you would handle the actual form submission here
+      // For now, we're preventing the default form submission to show the transition
+      // Remove the next line if you want the form to actually submit to your Flask backend
+      event.preventDefault();
+    }
+
+    // Show SweetAlert messages from Flask
+    document.addEventListener('DOMContentLoaded', () => {
+    const flashMessages = JSON.parse('{{ get_flashed_messages(with_categories=true) | tojson | safe }}');
+    if (Array.isArray(flashMessages) && flashMessages.length) {
+      flashMessages.forEach(([category, message]) => {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: category === 'success' ? 'success' : 'error',
+          title: message,
+          showConfirmButton: false,
+          timer: 3000
+        });
+      });
+    }
+  });
   </script>
+  <script>
+  
+  function toggleForgotPassword() {
+  const passwordInput = document.getElementById("forgotPassword");
+  const toggleIcon = document.getElementById("forgotToggleIcon");
+
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+    toggleIcon.textContent = "👁️";
+  } else {
+    passwordInput.type = "password";
+    toggleIcon.textContent = "🙈";
+  }
+}
+
+
+function showForgotPasswordForm() {
+  const testimonialContent = document.getElementById("testimonialContent");
+  const registerForm = document.getElementById("registerForm");
+  const forgotForm = document.getElementById("forgotForm");
+
+  // Reset others
+  testimonialContent.classList.add("fade-out");
+  registerForm.classList.remove("active");
+
+  setTimeout(() => {
+    testimonialContent.style.display = "none";
+    registerForm.style.display = "none";
+    forgotForm.classList.add("active");
+    forgotForm.style.display = "flex";
+  }, 300);
+}
+
+function showLoginForm() {
+  const testimonialContent = document.getElementById("testimonialContent");
+  const registerForm = document.getElementById("registerForm");
+  const forgotForm = document.getElementById("forgotForm");
+
+  registerForm.classList.remove("active");
+  forgotForm.classList.remove("active");
+
+  setTimeout(() => {
+    registerForm.style.display = "none";
+    forgotForm.style.display = "none";
+    testimonialContent.style.display = "block";
+    testimonialContent.classList.remove("fade-out");
+  }, 300);
+}
+</script>
 </body>
 </html>

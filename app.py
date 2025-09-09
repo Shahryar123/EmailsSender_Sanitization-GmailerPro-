@@ -27,7 +27,6 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 
 # 🔹 Key Vault setup
-KEY_VAULT_URL = "https://akv-test-ca.vault.azure.net/"
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 # print("OAUTHLIB_INSECURE_TRANSPORT =", os.environ.get("OAUTHLIB_INSECURE_TRANSPORT"))
@@ -36,18 +35,80 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 # ------------------------
 # Default User Credentials (for demo)
 # ------------------------
-users = {"admin@gmail.com": "admin"}  # TODO: replace with DB or hashed passwords
+# users = {"admin@gmail.com": "admin"}  
+KEY_VAULT_URL = "https://akv-test-ca.vault.azure.net/"
+credential = DefaultAzureCredential()
+secret_client = SecretClient(vault_url=KEY_VAULT_URL, credential=credential)
 
+def get_users_from_keyvault():
+    """Fetch and return users JSON from Key Vault."""
+    secret = secret_client.get_secret("app-users")
+    return json.loads(secret.value)
+
+def save_users_to_keyvault(users_dict):
+    """Save users JSON back to Key Vault."""
+    secret_client.set_secret("app-users", json.dumps(users_dict))
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        username = request.form.get("username")
+        new_password = request.form.get("newpassword")
+
+    try:
+        users = get_users_from_keyvault()
+        print(f"Users fetched from Key Vault for password reset: {users}")
+
+        # Update password (just overwrite string)
+        if username in users:
+            users[username] = new_password   # ✅ simple key:value
+        else:
+            flash("User not found!", "error")
+            return redirect(url_for("login"))
+
+        # Save updated JSON back to Key Vault
+        secret_client.set_secret("app-users", json.dumps(users))
+
+        flash("Password updated successfully. Please log in.", "success")
+        return redirect(url_for("login"))
+
+    except Exception as e:
+        print("Error:", e)
+        flash("Something went wrong. Try again.", "error")
+        return redirect(url_for("login"))
+
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    fullname = request.form.get("fullname")
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    users = get_users_from_keyvault()
+
+    if email in users:
+        flash("⚠️ Email already registered!", "error")
+        return redirect(url_for("login"))
+
+    # Save user (for now: store password directly, better to hash later 🔑)
+    users[email] = password  
+    save_users_to_keyvault(users)
+
+    flash("✅ Account created successfully! Please log in.", "success")
+    return redirect(url_for("login"))
 # ------------------------
 # Authentication Routes
 # ------------------------
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
 
+        # 🔑 Get users from Key Vault
+        users = get_users_from_keyvault()
+        print(f"Users fetched from Key Vault: {users}")
         if username in users and users[username] == password:
             session["user"] = username
             flash("Login successful!", "success")
