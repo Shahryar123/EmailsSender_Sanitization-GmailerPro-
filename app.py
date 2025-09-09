@@ -22,32 +22,37 @@ app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 app.secret_key = "super_secret_key"  # Required for session and flash messages
-import os
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# print("OAUTHLIB_INSECURE_TRANSPORT =", os.environ.get("OAUTHLIB_INSECURE_TRANSPORT"))
+# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # For local testing only
+
 
 
 # 🔹 Key Vault setup
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
-# print("OAUTHLIB_INSECURE_TRANSPORT =", os.environ.get("OAUTHLIB_INSECURE_TRANSPORT"))
-# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # For local testing only
 
 # ------------------------
 # Default User Credentials (for demo)
 # ------------------------
 # users = {"admin@gmail.com": "admin"}  
-KEY_VAULT_URL = "https://akv-test-ca.vault.azure.net/"
+
+
+key_vault = os.getenv("KeyVault_Name", "akv-test-ca")
+users = os.getenv("Users_List", "app-users")
+
+KEY_VAULT_URL = f"https://{key_vault}.vault.azure.net/"
 credential = DefaultAzureCredential()
 secret_client = SecretClient(vault_url=KEY_VAULT_URL, credential=credential)
 
 def get_users_from_keyvault():
     """Fetch and return users JSON from Key Vault."""
-    secret = secret_client.get_secret("app-users")
+    secret = secret_client.get_secret(users)
     return json.loads(secret.value)
 
 def save_users_to_keyvault(users_dict):
     """Save users JSON back to Key Vault."""
-    secret_client.set_secret("app-users", json.dumps(users_dict))
+    secret_client.set_secret(users, json.dumps(users_dict))
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
@@ -67,7 +72,7 @@ def forgot_password():
             return redirect(url_for("login"))
 
         # Save updated JSON back to Key Vault
-        secret_client.set_secret("app-users", json.dumps(users))
+        secret_client.set_secret(users, json.dumps(users))
 
         flash("Password updated successfully. Please log in.", "success")
         return redirect(url_for("login"))
@@ -81,7 +86,6 @@ def forgot_password():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    fullname = request.form.get("fullname")
     email = request.form.get("email")
     password = request.form.get("password")
 
