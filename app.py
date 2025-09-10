@@ -53,34 +53,33 @@ def get_users_from_keyvault():
 def save_users_to_keyvault(users_dict):
     """Save users JSON back to Key Vault."""
     secret_client.set_secret(users, json.dumps(users_dict))
-
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
         username = request.form.get("username")
         new_password = request.form.get("newpassword")
 
-    try:
-        users = get_users_from_keyvault()
-        print(f"Users fetched from Key Vault for password reset: {users}")
+        try:
+            users = get_users_from_keyvault()
+            print(f"Users fetched from Key Vault for password reset: {users}")
 
-        # Update password (just overwrite string)
-        if username in users:
-            users[username] = new_password   # ✅ simple key:value
-        else:
-            flash("User not found!", "error")
+            # Update password (just overwrite string)
+            if username in users:
+                users[username] = new_password  # ✅ update dict
+            else:
+                flash("User not found!", "error")
+                return redirect(url_for("login"))
+
+            # Save updated JSON back to Key Vault
+            secret_client.set_secret("app-users", json.dumps(users))  # ✅ fixed
+
+            flash("Password updated successfully. Please log in.", "success")
             return redirect(url_for("login"))
 
-        # Save updated JSON back to Key Vault
-        secret_client.set_secret(users, json.dumps(users))
-
-        flash("Password updated successfully. Please log in.", "success")
-        return redirect(url_for("login"))
-
-    except Exception as e:
-        print("Error:", e)
-        flash("Something went wrong. Try again.", "error")
-        return redirect(url_for("login"))
+        except Exception as e:
+            print("Error:", e)
+            flash("Something went wrong. Try again.", "error")
+            return redirect(url_for("login"))
 
 
 
