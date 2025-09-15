@@ -142,17 +142,62 @@ def login_required(func):
     return wrapper
 
 # ------------------------
+# Helper: Feature Flags from Key Vault or Env
+# ------------------------
+def get_feature_flag(name: str, default: str = "false") -> bool:
+    """
+    Retrieve a feature flag value.
+    1. Try Key Vault secret with the given name.
+    2. Fallback to environment variable.
+    3. If not found, use provided default.
+    Returns: Boolean
+    """
+    value = None
+    # Initialize Key Vault client once
+    credential = DefaultAzureCredential()
+    kv_client = SecretClient(vault_url=KEY_VAULT_URL, credential=credential)
+    # Try from Key Vault
+    try:
+        secret = kv_client.get_secret(name)
+        value = secret.value if secret else None
+    except Exception:
+        # If not found in Key Vault, fallback to env
+        value = os.getenv(name, default)
+
+    return str(value).lower() == "true"
+
+# ------------------------
 # Main page
 # ------------------------
 
 @app.route("/", methods=["GET"])
 @login_required
 def index():
+    # Feature flag from .env
+    send_email_feature = get_feature_flag("SEND-EMAIL", "true")
+    print(f"SEND-EMAIL is set to: {send_email_feature}")
+
+    generate_csv_feature = get_feature_flag("GENERATE-CSV", "true")
+    print(f"GENERATE-CSV is set to: {generate_csv_feature}")
+
+    email_insight = get_feature_flag("EMAIL-INSIGHT", "true")
+    print(f"EMAIL-INSIGHT is set to: {email_insight}")
+
+    # Get flashed messages with categories
     flash_messages = get_flashed_messages(with_categories=True)
+
+    # Format messages
     formatted_messages = [
         {"category": cat, "message": msg} for cat, msg in flash_messages
     ]
-    return render_template("index.html", flash_messages=formatted_messages)
+
+    return render_template(
+        "index.html",
+        flash_messages=formatted_messages,
+        send_email_feature=send_email_feature,
+        generate_csv_feature=generate_csv_feature,
+        email_insight=email_insight
+    )
 
 @app.route("/set-account", methods=["POST"])
 @login_required
