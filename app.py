@@ -5,6 +5,7 @@ import logging
 import os
 from flask import Flask, jsonify, render_template, send_from_directory, request, redirect, url_for, flash, session, get_flashed_messages
 import subprocess
+from sendmsg import send_template_message, send_freeform_message, send_custom_template
 
 from flask.cli import load_dotenv
 from send_emails import run_email_sender
@@ -144,27 +145,30 @@ def login_required(func):
 # ------------------------
 # Helper: Feature Flags from Key Vault or Env
 # ------------------------
-def get_feature_flag(name: str, default: str = "false") -> bool:
+
+
+feature_flags_cache = {}
+
+def load_feature_flags(names: list[str], default: str = "false") -> dict[str, bool]:
     """
-    Retrieve a feature flag value.
-    1. Try Key Vault secret with the given name.
-    2. Fallback to environment variable.
-    3. If not found, use provided default.
-    Returns: Boolean
+    Fetch all requested feature flags in one go.
+    First try Key Vault, fallback to env, otherwise use default.
+    Returns dict {flag_name: bool}
     """
-    value = None
-    # Initialize Key Vault client once
+    
     credential = DefaultAzureCredential()
     kv_client = SecretClient(vault_url=KEY_VAULT_URL, credential=credential)
-    # Try from Key Vault
-    try:
-        secret = kv_client.get_secret(name)
-        value = secret.value if secret else None
-    except Exception:
-        # If not found in Key Vault, fallback to env
-        value = os.getenv(name, default)
+    flags = {}
+    for name in names:
+        value = None
+        try:
+            secret = kv_client.get_secret(name)
+            value = secret.value if secret else None
+        except Exception:
+            value = os.getenv(name, default)
 
-    return str(value).lower() == "true"
+        flags[name] = str(value).lower() == "true"
+    return flags
 
 # ------------------------
 # Main page
@@ -173,31 +177,34 @@ def get_feature_flag(name: str, default: str = "false") -> bool:
 @app.route("/", methods=["GET"])
 @login_required
 def index():
-    # Feature flag from .env
-    send_email_feature = get_feature_flag("SEND-EMAIL", "true")
-    print(f"SEND-EMAIL is set to: {send_email_feature}")
+    # List of feature flags needed
+    flag_names = ["SEND-EMAIL", "GENERATE-CSV", "EMAIL-INSIGHT", "SEND-MSG"]
 
-    generate_csv_feature = get_feature_flag("GENERATE-CSV", "true")
-    print(f"GENERATE-CSV is set to: {generate_csv_feature}")
+    # Fetch all at once
+    feature_flags = load_feature_flags(flag_names, "true")
 
-    email_insight = get_feature_flag("EMAIL-INSIGHT", "true")
-    print(f"EMAIL-INSIGHT is set to: {email_insight}")
+    print(f"SEND-EMAIL: {feature_flags['SEND-EMAIL']}")
+    print(f"GENERATE-CSV: {feature_flags['GENERATE-CSV']}")
+    print(f"EMAIL-INSIGHT: {feature_flags['EMAIL-INSIGHT']}")
+    print(f"SEND-MSG: {feature_flags['SEND-MSG']}")
 
     # Get flashed messages with categories
     flash_messages = get_flashed_messages(with_categories=True)
-
-    # Format messages
-    formatted_messages = [
-        {"category": cat, "message": msg} for cat, msg in flash_messages
-    ]
+    formatted_messages = [{"category": cat, "message": msg} for cat, msg in flash_messages]
 
     return render_template(
         "index.html",
         flash_messages=formatted_messages,
-        send_email_feature=send_email_feature,
-        generate_csv_feature=generate_csv_feature,
-        email_insight=email_insight
+        # send_email_feature=feature_flags["SEND-EMAIL"],
+        # generate_csv_feature=feature_flags["GENERATE-CSV"],
+        # email_insight=feature_flags["EMAIL-INSIGHT"],
+        # send_msg_feature=feature_flags["SEND-MSG"],
+        send_email_feature="true",
+        generate_csv_feature="true",
+        email_insight="true",
+        send_msg_feature="true",
     )
+
 
 @app.route("/set-account", methods=["POST"])
 @login_required
@@ -409,6 +416,7 @@ def generate_csv():
             return jsonify({"success": False, "auth_required": True, "message": "Please authenticate Gmail first."})
         else:
             return jsonify({"success": False, "message": f"Error: {str(e)}"})
+
 
 # ======================
 # List CSVs
@@ -671,6 +679,22 @@ def gmail_oauth2callback():
             flash(f"CSV generated for emails from {start_date} to {end_date}!", "success")
         except subprocess.CalledProcessError:
             flash("Failed to generate CSV file.", "danger")
+
+    return redirect(url_for("index"))
+
+
+@app.route("/send_whatsapp", methods=["POST"])
+def send_whatsapp():
+    # Example: just send a test message
+    phone_number = request.form.get("phone_number")  # Get number from form (or hardcode)
+    message_type = request.form.get("message_type", "template")
+
+    if message_type == "template":
+        send_template_message(phone_number)
+    elif message_type == "freeform":
+        send_freeform_message(phone_number, "Hello 👋 from Flask!")
+    else:
+        send_custom_template(phone_number, "Shahryar")
 
     return redirect(url_for("index"))
 

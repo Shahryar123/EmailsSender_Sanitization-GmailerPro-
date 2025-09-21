@@ -1,11 +1,13 @@
 body {
     /* background: linear-gradient(135deg, #f0f3ff 0%, #8e44ad 100%); */
-        background: linear-gradient(135deg, #e1e5f7, #f7eefb);
-
+        /* background: linear-gradient(135deg, #e1e5f7, #f7eefb); */
+    background: #0d56ff0f;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+
 .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin-top: 20px;
     margin-bottom: 20px;
     text-align: center;
@@ -14,7 +16,7 @@ body {
 h1 {
     font-weight: 700;
     font-size: 2.8rem;
-    color: #6f42c1;
+    color: #45247f;
     margin-bottom: 0.25rem;
 }
 .subtitle {
@@ -112,12 +114,102 @@ h1 {
     justify-content: center;
     box-shadow: 0 3px 12px rgba(0,0,0,0.1);
 }
+
+.card.generate{
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 6px 6px 0px #000; /* bold shadow like in screenshot */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card.generate:hover {
+    transform: translateY(-5px); /* lift on hover */
+    box-shadow: 10px 10px 0px #000; /* stronger shadow */
+}
+
+.card.generate h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #0f172a; /* dark text */
+}
+
+.card.generate p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+
+.card.send{
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 6px 6px 0px #000; /* bold shadow like in screenshot */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card.send:hover {
+    transform: translateY(-5px); /* lift on hover */
+    box-shadow: 10px 10px 0px #000; /* stronger shadow */
+}
+
+.card.send h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #0f172a; /* dark text */
+}
+
+.card.send p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+.card.send-msg{
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 6px 6px 0px #000; /* bold shadow like in screenshot */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card.send-msg:hover {
+    transform: translateY(-5px); /* lift on hover */
+    box-shadow: 10px 10px 0px #000; /* stronger shadow */
+}
+
+.card.send-msg h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #0f172a; /* dark text */
+}
+
+.card.send-msg p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #374151;
+}
+
 .card.generate .card-icon {
     background: #3a63d8;
     color: white;
 }
 .card.send .card-icon {
     background: #8247f6;
+    color: white;
+}
+.card.send-msg .card-icon {
+    background: #07e54d;
     color: white;
 }
 .card h3 {
@@ -141,8 +233,7 @@ h1 {
 }
 .btn-generate {
     width: 100%;
-    background: #3a63d8;
-    background: linear-gradient(135deg, #3a63d8, #4f79f6);
+    background: #235386;
     border: none;
     color: white;
     font-weight: 600;
@@ -150,20 +241,23 @@ h1 {
     border-radius: 12px;
     padding: 12px 0;
     margin-top: 20px;
-    box-shadow: 0 6px 15px rgba(58, 99, 216, 0.5);
     transition: background 0.3s ease;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 8px;
+    
 }
 .btn-generate:hover {
-    background: #3354cc;
+    background: #142e49;
+    color:white;
+    transition: all 0.3s ease; /* smooth animation */
+    transform: scale(1.01); /* zoom effect */
+    box-shadow: 0 10px 20px rgba(72, 152, 159, 0.5);
 }
 .btn-send {
     width: 100%;
-    background: #8247f6;
-    background: linear-gradient(135deg, #8247f6, #a060ff);
+    background: #235386;
     border: none;
     color: white;
     font-weight: 600;
@@ -171,15 +265,43 @@ h1 {
     border-radius: 12px;
     padding: 12px 0;
     margin-top: 20px;
-    box-shadow: 0 6px 15px rgba(130, 71, 246, 0.5);
     transition: background 0.3s ease;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 8px;
+    transition: all 0.3s ease; /* smooth animation */
 }
 .btn-send:hover {
-    background: #6f3fd6;
+    background: #142e49;
+    color:white;
+    transition: all 0.3s ease; /* smooth animation */
+    transform: scale(1.01); /* zoom effect */
+    box-shadow: 0 10px 20px rgba(72, 152, 159, 0.5);
+}
+.btn-send-msg {
+    width: 100%;
+    background: #235386;
+    border: none;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    padding: 12px 0;
+    margin-top: 20px;
+    transition: background 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease; /* smooth animation */
+}
+.btn-send-msg:hover {
+    background: #142e49;
+    color:white;
+    transition: all 0.3s ease; /* smooth animation */
+    transform: scale(1.01); /* zoom effect */
+    box-shadow: 0 10px 20px rgba(72, 152, 159, 0.5);
 }
 .success-message {
     margin-top: 15px;
@@ -234,16 +356,15 @@ svg.icon {
 /* Button hover animation */
 .template-button {
     transition: all 0.2s ease-in-out;
-    color: white;
-    background: linear-gradient(135deg, #3c71b1 0%, #a07caf 100%);
-
-
+    color: #001f8c;
+    border-color: #001f8c;
+    border-width: 2px;
 }
 .template-button:hover {
     transform: scale(1.05);
     box-shadow: 0 0 8px rgba(13, 110, 253, 0.6);
     color: white;
-    background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
+    background: linear-gradient(135deg, #012e62 100%, #000000 0%);
 }
 
 /* Modal animation */
@@ -424,24 +545,39 @@ svg.icon {
 
 /* Selection counter */
 .selection-counter {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #667eea, #0022b9);
     color: white;
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: 16px;
     font-size: 14px;
     font-weight: 500;
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
-.csvButton{
+.csvButton {
     background: linear-gradient(135deg, #0022b9, #0022b9);
     color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* smooth animation */
 }
 
 .csvButton:hover {
     background: linear-gradient(135deg, #001f8c, #001f8c);
     color: white;
+    transform: scale(1.05); /* zoom effect */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* subtle shadow */
+}
+.csvButton i {
+    transition: transform 0.3s ease;
+}
+
+.csvButton:hover i {
+    transform: rotate(90deg); /* Icon rotates when hovered */
 }
 /* Custom scrollbar */
 .modal-file-list::-webkit-scrollbar {
@@ -916,29 +1052,23 @@ svg.icon {
 }
 
 .upload-button {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: 10px;
     font-size: 15px;
     font-weight: 650;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    transition: all 0.2s ease-in-out;
+    color: #001f8c;
+    border-color: #001f8c;
+    border-width: 2px;
 }
 .upload-button:hover {
     background: linear-gradient(135deg, #556ed1, #5e3ea8);
     color: white;
 }
-.file-input-wrapper {
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-}
-.file-input-wrapper input[type=file] {
-    position: absolute;
-    left: -9999px;
-}
+
 .selected-file {
     margin-top: 10px;
     padding: 10px;
