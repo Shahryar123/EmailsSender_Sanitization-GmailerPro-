@@ -1,7 +1,7 @@
 body {
     /* background: linear-gradient(135deg, #f0f3ff 0%, #8e44ad 100%); */
         /* background: linear-gradient(135deg, #e1e5f7, #f7eefb); */
-    background: #0d56ff0f;
+    background: #f2f2f2;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -16,7 +16,7 @@ body {
 h1 {
     font-weight: 700;
     font-size: 2.8rem;
-    color: #45247f;
+    color: #0f2d36;
     margin-bottom: 0.25rem;
 }
 .subtitle {
@@ -31,7 +31,7 @@ h1 {
     align-items: center;
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
+    background: linear-gradient(135deg, #2a748a 0%, #2a748a 100%);
     border-radius: 50%;
     box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
     cursor: pointer;
@@ -201,15 +201,15 @@ h1 {
 }
 
 .card.generate .card-icon {
-    background: #3a63d8;
+    background: #2a748a;
     color: white;
 }
 .card.send .card-icon {
-    background: #8247f6;
+    background: #2a748a;
     color: white;
 }
 .card.send-msg .card-icon {
-    background: #07e54d;
+    background: #2a748a;
     color: white;
 }
 .card h3 {
@@ -233,7 +233,7 @@ h1 {
 }
 .btn-generate {
     width: 100%;
-    background: #235386;
+    background: #f96d00;
     border: none;
     color: white;
     font-weight: 600;
@@ -249,7 +249,7 @@ h1 {
     
 }
 .btn-generate:hover {
-    background: #142e49;
+    background: #FF7D1C;
     color:white;
     transition: all 0.3s ease; /* smooth animation */
     transform: scale(1.01); /* zoom effect */
@@ -257,7 +257,7 @@ h1 {
 }
 .btn-send {
     width: 100%;
-    background: #235386;
+    background: #f96d00;
     border: none;
     color: white;
     font-weight: 600;
@@ -273,15 +273,15 @@ h1 {
     transition: all 0.3s ease; /* smooth animation */
 }
 .btn-send:hover {
-    background: #142e49;
+    background: #FF7D1C;
     color:white;
     transition: all 0.3s ease; /* smooth animation */
     transform: scale(1.01); /* zoom effect */
     box-shadow: 0 10px 20px rgba(72, 152, 159, 0.5);
 }
 .btn-send-msg {
-    width: 100%;
-    background: #235386;
+    width: 30%;
+    background: #f96d00;
     border: none;
     color: white;
     font-weight: 600;
@@ -289,15 +289,17 @@ h1 {
     border-radius: 12px;
     padding: 12px 0;
     margin-top: 20px;
-    transition: background 0.3s ease;
+    margin-left: auto;   /* pushes button to the right */
+    transition: all 0.3s ease; /* smooth animation */
+
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease; /* smooth animation */
 }
+
 .btn-send-msg:hover {
-    background: #142e49;
+    background: #FF7D1C;
     color:white;
     transition: all 0.3s ease; /* smooth animation */
     transform: scale(1.01); /* zoom effect */
@@ -356,15 +358,15 @@ svg.icon {
 /* Button hover animation */
 .template-button {
     transition: all 0.2s ease-in-out;
-    color: #001f8c;
-    border-color: #001f8c;
+    color: #ff6f3c;
+    border-color: #ff6f3c;
     border-width: 2px;
 }
 .template-button:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 8px rgba(13, 110, 253, 0.6);
+    box-shadow: #ff6f3c;
     color: white;
-    background: linear-gradient(135deg, #012e62 100%, #000000 0%);
+    background: linear-gradient(135deg, #ff6f3c 100%, #ff6f3c 0%);
 }
 
 /* Modal animation */
@@ -394,7 +396,7 @@ svg.icon {
     opacity: 1;
 }
 .modal-header{
-    background: linear-gradient(135deg, #2165b3 0%, #8e44ad 100%);
+    background: linear-gradient(to right, #0f2d36, #174958, #174958);
     color: white;
     padding: 12px 16px;
     border-bottom: 1px solid #eee;
@@ -545,7 +547,7 @@ svg.icon {
 
 /* Selection counter */
 .selection-counter {
-    background: linear-gradient(135deg, #667eea, #0022b9);
+    background: #222831;
     color: white;
     padding: 8px 16px;
     border-radius: 16px;
@@ -556,7 +558,7 @@ svg.icon {
     gap: 6px;
 }
 .csvButton {
-    background: linear-gradient(135deg, #0022b9, #0022b9);
+    background: #393e46;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -567,7 +569,7 @@ svg.icon {
 }
 
 .csvButton:hover {
-    background: linear-gradient(135deg, #001f8c, #001f8c);
+    background: #FF7D1C;
     color: white;
     transform: scale(1.05); /* zoom effect */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* subtle shadow */
@@ -668,18 +670,18 @@ svg.icon {
 }
 
 .emails-sent {
-    --color-primary: #3b82f6;
-    --color-secondary: #1d4ed8;
+    --color-primary: #174958;
+    --color-secondary: #0f2d36;
 }
 
 .delivery-rate {
-    --color-primary: #8b5cf6;
-    --color-secondary: #7c3aed;
+    --color-primary: #174958;
+    --color-secondary: #0f2d36;
 }
 
 .active-campaigns {
-    --color-primary: #10b981;
-    --color-secondary: #059669;
+    --color-primary: #174958;
+    --color-secondary: #0f2d36;
 }
 
 @media (max-width: 768px) {
@@ -721,20 +723,20 @@ svg.icon {
 }
 
 .all-record{
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: #f96d00;
     color: white;
 }
 .all-record:hover {
-    background: linear-gradient(135deg, #0f9b68, #0f9b68);
+    background: #FF7D1C;
     color: white;
 }
 
 .last-run {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: #f96d00;
     color: white;
 }
 .last-run:hover {
-    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    background: #FF7D1C;
     color: white;
 }
 
@@ -1060,12 +1062,12 @@ svg.icon {
     align-items: center;
     gap: 6px;
     transition: all 0.2s ease-in-out;
-    color: #001f8c;
-    border-color: #001f8c;
+    color: #393e46;
+    border-color: #393e46;
     border-width: 2px;
 }
 .upload-button:hover {
-    background: linear-gradient(135deg, #556ed1, #5e3ea8);
+    background: linear-gradient(135deg,#393e46, #393e46);
     color: white;
 }
 
@@ -1075,4 +1077,24 @@ svg.icon {
     background-color: #f8f9fa;
     border-radius: 5px;
     border: 1px solid #dee2e6;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(246, 236, 227, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 0.375rem; /* match card radius */
+  pointer-events: all;
+  gap: 1rem;
+}
+
+.lock-circle {
+    width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;
+    background-color: #ffd9d9;
+}
+.lock{
+    font-size: 3rem; color: #f96d00;
 }

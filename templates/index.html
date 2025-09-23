@@ -12,13 +12,13 @@
 
 <body>
     <!-- Navbar -->
-    <nav style="background: linear-gradient(to right, #1f0059, #d2c7ee, #dcd9e5); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; color: white;">
+    <nav style="background: linear-gradient(to right, #0f2d36, #174958, #174958); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; color: white;">
     <!-- Left Side -->
     <div class="navbar-heading-minimal">Email Extractor</div>
 
     <!-- Right Side Dropdown -->
     <div style="position: relative;">
-        <span onclick="toggleDropdown()" style="cursor: pointer; font-size: 25px;">👤</span>
+        <span onclick="toggleDropdown()" style="cursor: pointer; font-size: 25px;">⛔</span>
         <div id="dropdownMenu" style="display: none; position: absolute; right: 0; background: white; color: black; border-radius: 15px; box-shadow: 0 14px 16px rgba(0,0,0,0.1); margin-top: 8px; min-width: 220px; text-align: left; z-index: 100;">
         <a href="/logout" style="display: block; padding: 10px; text-decoration: none; color: black;">🚫 Sign Out</a>
         </div>
@@ -55,160 +55,327 @@
 
         </br>
 
-        <div class="cards-row">
+        <!--==================================================-->
+        <div class="row g-4">
             <!-- Generate CSV Card -->
-            {% if generate_csv_feature %}
-            <div class="card generate">
-                <div class="card-icon" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-filetype-csv" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM3.517 14.841a1.13 1.13 0 0 0 .401.823q.195.162.478.252.284.091.665.091.507 0 .859-.158.354-.158.539-.44.187-.284.187-.656 0-.336-.134-.56a1 1 0 0 0-.375-.357 2 2 0 0 0-.566-.21l-.621-.144a1 1 0 0 1-.404-.176.37.37 0 0 1-.144-.299q0-.234.185-.384.188-.152.512-.152.214 0 .37.068a.6.6 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.1 1.1 0 0 0-.2-.566 1.2 1.2 0 0 0-.5-.41 1.8 1.8 0 0 0-.78-.152q-.439 0-.776.15-.337.149-.527.421-.19.273-.19.639 0 .302.122.524.124.223.352.367.228.143.539.213l.618.144q.31.073.463.193a.39.39 0 0 1 .152.326.5.5 0 0 1-.085.29.56.56 0 0 1-.255.193q-.167.07-.413.07-.175 0-.32-.04a.8.8 0 0 1-.248-.115.58.58 0 0 1-.255-.384zM.806 13.693q0-.373.102-.633a.87.87 0 0 1 .302-.399.8.8 0 0 1 .475-.137q.225 0 .398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.4 1.4 0 0 0-.489-.272 1.8 1.8 0 0 0-.606-.097q-.534 0-.911.223-.375.222-.572.632-.195.41-.196.979v.498q0 .568.193.976.197.407.572.626.375.217.914.217.439 0 .785-.164t.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.8.8 0 0 1-.118.363.7.7 0 0 1-.272.25.9.9 0 0 1-.401.087.85.85 0 0 1-.478-.132.83.83 0 0 1-.299-.392 1.7 1.7 0 0 1-.102-.627zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879z"/>
-                    </svg>
-                </div>
-                <h3>Generate CSV</h3>
-                <form method="post" class="mb-0">
-                    <label for="smtp_account" class="form-label">Select Gmail Account</label>
-                    <select id="smtp_account" name="smtp_account" class="form-select">
-                        <option value="1">🥇 sales@longislandequipment.com</option>
-                        <option value="2">🥈 iqtechconsultancy@gmail.com</option>
-                        <option value="3">🥉 iqtechsupport@gmail.com</option>
-                        <option value="5">🥉 info@iqtechsolutions.co.uk</option>
-                    </select>
-                    
-                    <label for="email_option" class="form-label">Select Option</label>
-                    <div class="d-flex align-items-center">
-                        <select name="email_option" id="email_option" class="form-select" aria-label="Select Option">
-                            <option value="all" selected>📨 All Emails</option>
-                            <option value="date">📅 Select Date</option>
-                        </select>&nbsp;&nbsp;
-                        <button type="button" id="showBtn" class="btn template-button">
-                            Preview
-                        </button>
-                    </div>
-                    <!-- Date inputs (smoothly expand) -->
-                    <div id="date_range">
-                        <div class="mb-3" style="margin-top: 13px;">
-                            <label for="start_date" class="form-label">From Date</label>
-                            <input type="date" name="start_date" id="start_date" class="form-control">
+            <div class="col-md-6">
+                {% if generate_csv_feature %}
+                    <div class="card generate h-100">
+                        <div class="card-icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-filetype-csv" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM3.517 14.841a1.13 1.13 0 0 0 .401.823q.195.162.478.252.284.091.665.091.507 0 .859-.158.354-.158.539-.44.187-.284.187-.656 0-.336-.134-.56a1 1 0 0 0-.375-.357 2 2 0 0 0-.566-.21l-.621-.144a1 1 0 0 1-.404-.176.37.37 0 0 1-.144-.299q0-.234.185-.384.188-.152.512-.152.214 0 .37.068a.6.6 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.1 1.1 0 0 0-.2-.566 1.2 1.2 0 0 0-.5-.41 1.8 1.8 0 0 0-.78-.152q-.439 0-.776.15-.337.149-.527.421-.19.273-.19.639 0 .302.122.524.124.223.352.367.228.143.539.213l.618.144q.31.073.463.193a.39.39 0 0 1 .152.326.5.5 0 0 1-.085.29.56.56 0 0 1-.255.193q-.167.07-.413.07-.175 0-.32-.04a.8.8 0 0 1-.248-.115.58.58 0 0 1-.255-.384zM.806 13.693q0-.373.102-.633a.87.87 0 0 1 .302-.399.8.8 0 0 1 .475-.137q.225 0 .398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.4 1.4 0 0 0-.489-.272 1.8 1.8 0 0 0-.606-.097q-.534 0-.911.223-.375.222-.572.632-.195.41-.196.979v.498q0 .568.193.976.197.407.572.626.375.217.914.217.439 0 .785-.164t.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.8.8 0 0 1-.118.363.7.7 0 0 1-.272.25.9.9 0 0 1-.401.087.85.85 0 0 1-.478-.132.83.83 0 0 1-.299-.392 1.7 1.7 0 0 1-.102-.627zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879z"/>
+                            </svg>
                         </div>
-                        <div class="mb-3">
-                            <label for="end_date" class="form-label">To Date</label>
-                            <input type="date" name="end_date" id="end_date" class="form-control">
-                        </div>
-                    </div>
-                        <!--Upload CSVs-->
-                    <div class="container mt-4">
-                        <div class="mb-3 d-flex justify-content-between align-items-center">
-                            <!-- File Input (Hidden) -->
-                            <div class="file-input-wrapper">
-                                <button type="button" class="btn csvButton" id="browseBtn">
-                                    <i class="fas fa-plus"></i> Browse CSV File
-                                </button>
-                                <input type="file" id="csvFile" name="file" accept=".csv" style="display: none;">
-                            </div>
+                        <h3>Generate CSV</h3>
+                        <form method="post" class="mb-0">
+                            <label for="smtp_account" class="form-label">Select Gmail Account</label>
+                            <select id="smtp_account" name="smtp_account" class="form-select">
+                                <option value="1">🥇 sales@longislandequipment.com</option>
+                                <option value="2">🥈 iqtechconsultancy@gmail.com</option>
+                                <option value="3">🥉 iqtechsupport@gmail.com</option>
+                                <option value="5">🥉 info@iqtechsolutions.co.uk</option>
+                            </select>
                             
-                            <button type="button" class="btn upload-button" id="uploadBtn" disabled>
-                                <span style="font-size: 16px;">⬆️ </span>Upload CSV
-                            </button>
-                        </div>
-                        
-                        <!-- Selected File Display -->
-                        <div id="selectedFile" class="selected-file" style="display: none;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>Selected file:</strong> <span id="fileName"></span>
-                                </div>
-                                <button type="button" class="btn btn-outline-danger btn-sm" id="removeFileBtn">
-                                    <i class="fas fa-times"></i> Remove
+                            <label for="email_option" class="form-label">Select Option</label>
+                            <div class="d-flex align-items-center">
+                                <select name="email_option" id="email_option" class="form-select" aria-label="Select Option">
+                                    <option value="all" selected>📨 All Emails</option>
+                                    <option value="date">📅 Select Date</option>
+                                </select>&nbsp;&nbsp;
+                                <button type="button" id="showBtn" class="btn template-button">
+                                    Preview
                                 </button>
                             </div>
-                        </div>
-                        
-                        <!-- Upload Status -->
-                        <div id="uploadStatus" class="upload-status"></div>
-                    </div>
-                    <button type="button" id="generateCsvBtn" class="btn btn-generate" >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                            class="bi bi-magic" viewBox="0 0 16 16">
-                            <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/>
-                        </svg>
-                        Generate CSV
-                    </button>
-
-                </form>
-                
-            </div>
-            {% endif %}
-
-            
-            <!-- Send Emails Card -->
-            {% if send_email_feature %}
-            <div class="card send">
-                <div class="card-icon" aria-hidden="true">
-                    <!-- Send Icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-send-check-fill" viewBox="0 0 16 16">
-                        <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
-                        <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
-                    </svg>
-                </div>
-                <h3>Send Emails</h3>
-                <form id="emailCardForm" method="post" class="mb-0">
-                    <label for="smtp_account_email" class="form-label">Select Gmail Account</label>
-                    <select id="smtp_account_email" name="smtp_account_email" class="form-select">
-                        <option value="1">🥇 sales@longislandequipment.com</option>
-                        <option value="2">🥈 iqtechconsultancy@gmail.com</option>
-                        <option value="3">🥉 iqtechsupport@gmail.com</option>
-                        <option value="5">🥉 info@iqtechsolutions.co.uk</option>
-                    </select>
-                    <!-- <input type="hidden" name="num_emails" value="{{ last_num_emails }}"> -->
-                    <label for="template_name" class="form-label">Email Template</label>
-                    
-                    <div class="d-flex align-items-center">
-                        <select name="template_name" id="template_name" class="form-select" aria-label="Email Template" onchange="handleTemplateChange(this)">
-                            <option value="" disabled selected>👇 Select Template </option>
-                            <option value="__create_new__">➕ Create New Template</option>
-                        </select>&nbsp;&nbsp;
-
-                        <button type="button" id="preview_btn" class="btn template-button">
-                            Preview
-                        </button>
-                    </div>
-
-                    <!--Select CSVs-->
-                    <div class="container mt-4">
-                        <div class="mb-3 d-flex justify-content-between align-items-center">
-                            <!-- CSV Button -->
-                            <button type="button" class="btn csvButton" data-bs-toggle="modal" data-bs-target="#csvModal">
-                                <i class="fas fa-plus"></i> Select CSV Files
+                            <!-- Date inputs (smoothly expand) -->
+                            <div id="date_range">
+                                <div class="mb-3" style="margin-top: 13px;">
+                                    <label for="start_date" class="form-label">From Date</label>
+                                    <input type="date" name="start_date" id="start_date" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label">To Date</label>
+                                    <input type="date" name="end_date" id="end_date" class="form-control">
+                                </div>
+                            </div>
+                                <!--Upload CSVs-->
+                            <div class="container mt-4">
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <!-- File Input (Hidden) -->
+                                    <div class="file-input-wrapper">
+                                        <button type="button" class="btn csvButton" id="browseBtn">
+                                            <i class="fas fa-plus"></i> Browse CSV File
+                                        </button>
+                                        <input type="file" id="csvFile" name="file" accept=".csv" style="display: none;">
+                                    </div>
+                                    
+                                    <button type="button" class="btn upload-button" id="uploadBtn" disabled>
+                                        <span style="font-size: 16px;">⬆️ </span>Upload CSV
+                                    </button>
+                                </div>
+                                
+                                <!-- Selected File Display -->
+                                <div id="selectedFile" class="selected-file" style="display: none;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Selected file:</strong> <span id="fileName"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" id="removeFileBtn">
+                                            <i class="fas fa-times"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Upload Status -->
+                                <div id="uploadStatus" class="upload-status"></div>
+                            </div>
+                            <button type="button" id="generateCsvBtn" class="btn btn-generate" >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                                    class="bi bi-magic" viewBox="0 0 16 16">
+                                    <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/>
+                                </svg>
+                                Generate CSV
                             </button>
 
-                            <!-- Counter -->
-                            <span class="selection-counter fw-semibold" id="selectionCounter">
-                            <i class="fas fa-file"></i> 0 files selected
-                            </span>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="position-relative h-100">
+                        <div class="card generate h-100">
+                            <div class="card-icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-filetype-csv" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM3.517 14.841a1.13 1.13 0 0 0 .401.823q.195.162.478.252.284.091.665.091.507 0 .859-.158.354-.158.539-.44.187-.284.187-.656 0-.336-.134-.56a1 1 0 0 0-.375-.357 2 2 0 0 0-.566-.21l-.621-.144a1 1 0 0 1-.404-.176.37.37 0 0 1-.144-.299q0-.234.185-.384.188-.152.512-.152.214 0 .37.068a.6.6 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.1 1.1 0 0 0-.2-.566 1.2 1.2 0 0 0-.5-.41 1.8 1.8 0 0 0-.78-.152q-.439 0-.776.15-.337.149-.527.421-.19.273-.19.639 0 .302.122.524.124.223.352.367.228.143.539.213l.618.144q.31.073.463.193a.39.39 0 0 1 .152.326.5.5 0 0 1-.085.29.56.56 0 0 1-.255.193q-.167.07-.413.07-.175 0-.32-.04a.8.8 0 0 1-.248-.115.58.58 0 0 1-.255-.384zM.806 13.693q0-.373.102-.633a.87.87 0 0 1 .302-.399.8.8 0 0 1 .475-.137q.225 0 .398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.4 1.4 0 0 0-.489-.272 1.8 1.8 0 0 0-.606-.097q-.534 0-.911.223-.375.222-.572.632-.195.41-.196.979v.498q0 .568.193.976.197.407.572.626.375.217.914.217.439 0 .785-.164t.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.8.8 0 0 1-.118.363.7.7 0 0 1-.272.25.9.9 0 0 1-.401.087.85.85 0 0 1-.478-.132.83.83 0 0 1-.299-.392 1.7 1.7 0 0 1-.102-.627zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879z"/>
+                                </svg>
+                            </div>
+                            <h3>Generate CSV</h3>
+                            <form method="post" class="mb-0">
+                                <label for="smtp_account" class="form-label">Select Gmail Account</label>
+                                <select id="smtp_account" name="smtp_account" class="form-select">
+                                    <option value="1">🥇 sales@longislandequipment.com</option>
+                                    <option value="2">🥈 iqtechconsultancy@gmail.com</option>
+                                    <option value="3">🥉 iqtechsupport@gmail.com</option>
+                                    <option value="5">🥉 info@iqtechsolutions.co.uk</option>
+                                </select>
+                                
+                                <label for="email_option" class="form-label">Select Option</label>
+                                <div class="d-flex align-items-center">
+                                    <select name="email_option" id="email_option" class="form-select" aria-label="Select Option">
+                                        <option value="all" selected>📨 All Emails</option>
+                                        <option value="date">📅 Select Date</option>
+                                    </select>&nbsp;&nbsp;
+                                    <button type="button" id="showBtn" class="btn template-button">
+                                        Preview
+                                    </button>
+                                </div>
+                                <!-- Date inputs (smoothly expand) -->
+                                <div id="date_range">
+                                    <div class="mb-3" style="margin-top: 13px;">
+                                        <label for="start_date" class="form-label">From Date</label>
+                                        <input type="date" name="start_date" id="start_date" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="end_date" class="form-label">To Date</label>
+                                        <input type="date" name="end_date" id="end_date" class="form-control">
+                                    </div>
+                                </div>
+                                    <!--Upload CSVs-->
+                                <div class="container mt-4">
+                                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                                        <!-- File Input (Hidden) -->
+                                        <div class="file-input-wrapper">
+                                            <button type="button" class="btn csvButton" id="browseBtn">
+                                                <i class="fas fa-plus"></i> Browse CSV File
+                                            </button>
+                                            <input type="file" id="csvFile" name="file" accept=".csv" style="display: none;">
+                                        </div>
+                                        
+                                        <button type="button" class="btn upload-button" id="uploadBtn" disabled>
+                                            <span style="font-size: 16px;">⬆️ </span>Upload CSV
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Selected File Display -->
+                                    <div id="selectedFile" class="selected-file" style="display: none;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Selected file:</strong> <span id="fileName"></span>
+                                            </div>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" id="removeFileBtn">
+                                                <i class="fas fa-times"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Upload Status -->
+                                    <div id="uploadStatus" class="upload-status"></div>
+                                </div>
+                                <button type="button" id="generateCsvBtn" class="btn btn-generate" >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                                        class="bi bi-magic" viewBox="0 0 16 16">
+                                        <path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.035A.5.5 0 0 0 13.293 2L12 3.293a.5.5 0 1 0 .707.707zM7.293 4A.5.5 0 1 0 8 3.293L6.707 2A.5.5 0 0 0 6 2.707zm-.621 2.5a.5.5 0 1 0 0-1H4.843a.5.5 0 1 0 0 1zm8.485 0a.5.5 0 1 0 0-1h-1.829a.5.5 0 0 0 0 1zM13.293 10A.5.5 0 1 0 14 9.293L12.707 8a.5.5 0 1 0-.707.707zM9.5 11.157a.5.5 0 0 0 1 0V9.328a.5.5 0 0 0-1 0zm1.854-5.097a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L8.646 5.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0l1.293-1.293Zm-3 3a.5.5 0 0 0 0-.706l-.708-.708a.5.5 0 0 0-.707 0L.646 13.94a.5.5 0 0 0 0 .707l.708.708a.5.5 0 0 0 .707 0z"/>
+                                    </svg>
+                                    Generate CSV
+                                </button>
+
+                            </form>
+                        </div>
+                        <!-- Overlay -->
+                        <div class="overlay">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="rounded-circle p-3 mb-3 lock-circle">
+                                    <i class="fas fa-lock lock"></i>
+                                </div>
+                                <h3 class="fw-bold text-dark mb-1">Ask Admin for Permissions</h3>
+                                <p class="text-muted small mb-0"><b>This feature requires special access</b></p>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Checkbox for duplicate values -->
-                    <!-- <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="allow_duplicates" id="allow_duplicates" value="1">
-                        <label class="form-check-label" for="allow_duplicates">
-                            Allow Duplicate Values in CSV
-                        </label>
-                    </div> -->
-                    <button type="button" id="sendEmailBtn" class="btn btn-send">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                        </svg>
-                        Send Emails
-                    </button>
-
-                </form>
-                
-                 
+                {% endif %}
             </div>
-            {% endif %}
 
+            <!-- Send Emails Card -->
+            <div class="col-md-6">
+                {% if send_email_feature %}
+                    <div class="card send h-100">
+                        <div class="card-icon" aria-hidden="true">
+                            <!-- Send Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-send-check-fill" viewBox="0 0 16 16">
+                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
+                                <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                            </svg>
+                        </div>
+                        <h3>Send Emails</h3>
+                        <form id="emailCardForm" method="post" class="mb-0">
+                            <label for="smtp_account_email" class="form-label">Select Gmail Account</label>
+                            <select id="smtp_account_email" name="smtp_account_email" class="form-select">
+                                <option value="1">🥇 sales@longislandequipment.com</option>
+                                <option value="2">🥈 iqtechconsultancy@gmail.com</option>
+                                <option value="3">🥉 iqtechsupport@gmail.com</option>
+                                <option value="5">🥉 info@iqtechsolutions.co.uk</option>
+                            </select>
+                            <!-- <input type="hidden" name="num_emails" value="{{ last_num_emails }}"> -->
+                            <label for="template_name" class="form-label">Email Template</label>
+                            
+                            <div class="d-flex align-items-center">
+                                <select name="template_name" id="template_name" class="form-select" aria-label="Email Template" onchange="handleTemplateChange(this)">
+                                    <option value="" disabled selected>👇 Select Template </option>
+                                    <option value="__create_new__">➕ Create New Template</option>
+                                </select>&nbsp;&nbsp;
+
+                                <button type="button" id="preview_btn" class="btn template-button">
+                                    Preview
+                                </button>
+                            </div>
+
+                            <!--Select CSVs-->
+                            <div class="container mt-4">
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <!-- CSV Button -->
+                                    <button type="button" class="btn csvButton" data-bs-toggle="modal" data-bs-target="#csvModal">
+                                        <i class="fas fa-plus"></i> Select CSV Files
+                                    </button>
+
+                                    <!-- Counter -->
+                                    <span class="selection-counter fw-semibold" id="selectionCounter">
+                                    <i class="fas fa-file"></i> 0 files selected
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Checkbox for duplicate values -->
+                            <!-- <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="allow_duplicates" id="allow_duplicates" value="1">
+                                <label class="form-check-label" for="allow_duplicates">
+                                    Allow Duplicate Values in CSV
+                                </label>
+                            </div> -->
+                            <button type="button" id="sendEmailBtn" class="btn btn-send">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                </svg>
+                                Send Emails
+                            </button>
+
+                        </form>
+                    </div>
+                {% else %}
+                <div class="position-relative h-100">
+                    <div class="card send h-100">
+                        <div class="card-icon" aria-hidden="true">
+                            <!-- Send Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-send-check-fill" viewBox="0 0 16 16">
+                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 1.59 2.498C8 14 8 13 8 12.5a4.5 4.5 0 0 1 5.026-4.47zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
+                                <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0m-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686"/>
+                            </svg>
+                        </div>
+                        <h3>Send Emails</h3>
+                        <form id="emailCardForm" method="post" class="mb-0">
+                            <label for="smtp_account_email" class="form-label">Select Gmail Account</label>
+                            <select id="smtp_account_email" name="smtp_account_email" class="form-select">
+                                <option value="1">🥇 sales@longislandequipment.com</option>
+                                <option value="2">🥈 iqtechconsultancy@gmail.com</option>
+                                <option value="3">🥉 iqtechsupport@gmail.com</option>
+                                <option value="5">🥉 info@iqtechsolutions.co.uk</option>
+                            </select>
+                            <!-- <input type="hidden" name="num_emails" value="{{ last_num_emails }}"> -->
+                            <label for="template_name" class="form-label">Email Template</label>
+                            
+                            <div class="d-flex align-items-center">
+                                <select name="template_name" id="template_name" class="form-select" aria-label="Email Template" onchange="handleTemplateChange(this)">
+                                    <option value="" disabled selected>👇 Select Template </option>
+                                    <option value="__create_new__">➕ Create New Template</option>
+                                </select>&nbsp;&nbsp;
+
+                                <button type="button" id="preview_btn" class="btn template-button">
+                                    Preview
+                                </button>
+                            </div>
+
+                            <!--Select CSVs-->
+                            <div class="container mt-4">
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <!-- CSV Button -->
+                                    <button type="button" class="btn csvButton" data-bs-toggle="modal" data-bs-target="#csvModal">
+                                        <i class="fas fa-plus"></i> Select CSV Files
+                                    </button>
+
+                                    <!-- Counter -->
+                                    <span class="selection-counter fw-semibold" id="selectionCounter">
+                                    <i class="fas fa-file"></i> 0 files selected
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Checkbox for duplicate values -->
+                            <!-- <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="allow_duplicates" id="allow_duplicates" value="1">
+                                <label class="form-check-label" for="allow_duplicates">
+                                    Allow Duplicate Values in CSV
+                                </label>
+                            </div> -->
+                            <button type="button" id="sendEmailBtn" class="btn btn-send">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                </svg>
+                                Send Emails
+                            </button>
+
+                        </form>
+                    </div>
+                    <!-- Overlay -->
+                    <div class="overlay">
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="rounded-circle p-3 mb-3 lock-circle">
+                                <i class="fas fa-lock lock"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark mb-1">Ask Admin for Permissions</h3>
+                            <p class="text-muted small mb-0"><b>This feature requires special access</b></p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
+    
 
         <!-- <h3 id="filesHeading" style="display: none;margin-top: 30px;">Files in EmailsInfo</h3> -->
         <table class="table table-bordered table-hover" id="filesTable" style="display:none;">
@@ -229,8 +396,9 @@
         <!--==================================================-->
         <!-- ============ WhatsApp Messages ==================-->
         <!--==================================================-->
-        {% if send_msg_feature %}
-        <div class="card send-msg">
+        <div class="col-md-12">
+            {% if send_msg_feature %}
+            <div class="card send-msg">
                 <div class="card-icon" aria-hidden="true">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.588-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.692.677-.692 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
@@ -287,39 +455,153 @@
                         </svg>
                         Send Whatsapp Message
                     </button>
-                </form>
+                </form>   
+            </div>
+            {% else %}
+            <div class="position-relative">
+                <div class="card send-msg">
+                    <div class="card-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.588-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.692.677-.692 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                        </svg>
+                    </div>
+                    <h3>Send WhatsApp Messages</h3>
+                    <!-- <form id="emailCardForm" method="post" class="mb-0">
+                        <label for="smtp_account_email" class="form-label">Select WhatsApp Account</label>
+                        <select id="smtp_account_email" name="smtp_account_email" class="form-select">
+                            <option value="1">🥉 info@iqtechsolutions.co.uk</option>
+                        </select>
+                        <label for="template_name" class="form-label">WhatsApp Template</label>
+                        
+                        <div class="d-flex align-items-center">
+                            <select name="template_name" id="template_name" class="form-select" aria-label="WhatsApp Template" onchange="handleTemplateChange(this)">
+                                <option value="" disabled selected>👇 Select Template </option>
+                                <option value="__create_new__">➕ Create New Template</option>
+                            </select>&nbsp;&nbsp;
 
+                            <button type="button" id="preview_btn" class="btn template-button">
+                                Preview
+                            </button>
+                        </div>
 
-                 
-        </div>
-        {% endif %}
-        <!--==================================================-->
-        {% if email_insight %}
-        <div class="statsCard">
-            <div class="stats-container">
-                <div class="stat-item emails-sent">
-                    <div class="stat-title">Emails Record</div>
-                    <button class="btn all-record">📋 All Records</button>&nbsp;
-                    <button class="btn last-run">↩️ Last Run</button>
-                </div>
+                        <div class="container mt-4">
+                            <div class="mb-3 d-flex justify-content-between align-items-center">
+                                <button type="button" class="btn csvButton" onclick="openCSVModal('whatsapp')">
+                                    <i class="fas fa-plus"></i> Select WhatsApp CSV Files
+                                </button>
 
-                <div class="stat-item emails-sent">
-                    <div class="stat-number" id="totalEmailsSent">0</div>
-                    <div class="stat-label">Total Emails</div>
+                                <span class="selection-counter fw-semibold" id="selectionCounter">
+                                <i class="fas fa-file"></i> 0 files selected
+                                </span>
+                            </div>
+                        </div>
+
+                        <button type="button" id="sendWhatsAppBtn" class="btn btn-send-msg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                            Send Whatsapp Message
+                        </button>
+
+                    </form> -->
+                    <form action="{{ url_for('send_whatsapp') }}" method="post" class="mb-0">
+                        <label for="phone_number" class="form-label">Enter Phone Number (with country code)</label>
+                        <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="923041234567" required>
+
+                        <input type="hidden" name="message_type" value="template">
+
+                        <button type="submit" class="btn btn-send-msg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                            Send Whatsapp Message
+                        </button>
+                    </form>   
                 </div>
-                                
-                <div class="stat-item delivery-rate">
-                    <div class="stat-number">99%</div>
-                    <div class="stat-label">Delivery Rate</div>
-                </div>
-                
-                <div class="stat-item active-campaigns">
-                    <div class="stat-number">2</div>
-                    <div class="stat-label">Active Campaigns</div>
+                <!-- Overlay -->
+                <div class="overlay">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="rounded-circle p-3 mb-3 lock-circle">
+                            <i class="fas fa-lock lock"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark mb-1">Ask Admin for Permissions</h3>
+                        <p class="text-muted small mb-0"><b>This feature requires special access</b></p>
+                    </div>
                 </div>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
+
+        <!--==================================================-->
+        <!-- ============ Email Insight ==================-->
+        <!--==================================================-->     
+        <div class="col-md-12">   
+            {% if email_insight %}
+                <div class="statsCard">
+                    <div class="stats-container">
+                        <div class="stat-item emails-sent">
+                            <div class="stat-title">Emails Record</div>
+                            <button class="btn all-record">📋 All Records</button>&nbsp;
+                            <button class="btn last-run">↩️ Last Run</button>
+                        </div>
+
+                        <div class="stat-item emails-sent">
+                            <div class="stat-number" id="totalEmailsSent">0</div>
+                            <div class="stat-label">Total Emails</div>
+                        </div>
+                                        
+                        <div class="stat-item delivery-rate">
+                            <div class="stat-number">99%</div>
+                            <div class="stat-label">Delivery Rate</div>
+                        </div>
+                        
+                        <div class="stat-item active-campaigns">
+                            <div class="stat-number">2</div>
+                            <div class="stat-label">Active Campaigns</div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+            <div class="position-relative">
+                <div class="statsCard">
+                    <div class="stats-container">
+                        <div class="stat-item emails-sent">
+                            <div class="stat-title">Emails Record</div>
+                            <button class="btn all-record">📋 All Records</button>&nbsp;
+                            <button class="btn last-run">↩️ Last Run</button>
+                        </div>
+
+                        <div class="stat-item emails-sent">
+                            <div class="stat-number" id="totalEmailsSent">0</div>
+                            <div class="stat-label">Total Emails</div>
+                        </div>
+                                        
+                        <div class="stat-item delivery-rate">
+                            <div class="stat-number">99%</div>
+                            <div class="stat-label">Delivery Rate</div>
+                        </div>
+                        
+                        <div class="stat-item active-campaigns">
+                            <div class="stat-number">2</div>
+                            <div class="stat-label">Active Campaigns</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Overlay -->
+                <div class="overlay" style="max-width: 955px; margin: 0 auto; left: 1px;">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="rounded-circle p-3 mb-3 lock-circle">
+                            <i class="fas fa-lock lock"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark mb-1">Ask Admin for Permissions</h3>
+                        <p class="text-muted small mb-0"><b>This feature requires special access</b></p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+
        <!-- Table container (initially hidden) -->
         <div id="recordsTableContainer">
             <h3>📈 Email Records</h3>
@@ -367,7 +649,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="templatePreviewLabel">Template Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style=""></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" style="padding:0;">
         <iframe id="templatePreviewFrame" style="width:100%; height:80vh; border:none;"></iframe>
@@ -407,7 +689,7 @@
                 <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times"></i> Cancel
                 </button> -->
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="confirmSelection">
+                <button type="button" class="btn" style="background-color: #f96d00; color: white;" data-bs-dismiss="modal" id="confirmSelection">
                     <i class="fas fa-check"></i> Confirm Selection (<span id="confirmCounter">0</span>)
                 </button>
             </div>

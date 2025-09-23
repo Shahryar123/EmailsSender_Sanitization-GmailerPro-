@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import csv
 import datetime
 import io
@@ -6,6 +7,7 @@ import os
 from flask import Flask, jsonify, render_template, send_from_directory, request, redirect, url_for, flash, session, get_flashed_messages
 import subprocess
 from sendmsg import send_template_message, send_freeform_message, send_custom_template
+import time
 
 from flask.cli import load_dotenv
 from send_emails import run_email_sender
@@ -19,6 +21,9 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import send_file
 from azure_storage import container_client
 
+from azure.mgmt.web import WebSiteManagementClient
+
+
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
@@ -31,6 +36,7 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # 🔹 Key Vault setup
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+SUBSCRIPTION_ID = os.getenv("SUBSCRIPTION_ID", "c8bd8aa5-3aba-4806-add2-357985a59ccc")
 
 
 # ------------------------
@@ -46,6 +52,15 @@ KEY_VAULT_URL = f"https://{key_vault}.vault.azure.net/"
 credential = DefaultAzureCredential()
 secret_client = SecretClient(vault_url=KEY_VAULT_URL, credential=credential)
 
+FLAG_NAMES = ["SEND-EMAIL", "GENERATE-CSV", "EMAIL-INSIGHT", "SEND-MSG"]
+
+# simple in-memory cache
+cache_data = None
+cache_time = 0
+CACHE_TTL = 200  # cache for 200 seconds
+feature_flags_cache = {}
+
+
 def get_users_from_keyvault():
     """Fetch and return users JSON from Key Vault."""
     secret = secret_client.get_secret(users)
@@ -54,6 +69,7 @@ def get_users_from_keyvault():
 def save_users_to_keyvault(users_dict):
     """Save users JSON back to Key Vault."""
     secret_client.set_secret(users, json.dumps(users_dict))
+    
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
@@ -81,8 +97,6 @@ def forgot_password():
             print("Error:", e)
             flash("Something went wrong. Try again.", "error")
             return redirect(url_for("login"))
-
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -113,15 +127,22 @@ def login():
         # 🔑 Get users from Key Vault
         users = get_users_from_keyvault()
         print(f"Users fetched from Key Vault: {users}")
+
         if username in users and users[username] == password:
             session["user"] = username
             flash("Login successful!", "success")
-            return redirect(url_for("index"))
+
+            # ✅ Redirect admin to admin.html, others to index.html
+            if username == "admin@gmail.com":   # or whatever your admin username is
+                return redirect(url_for("admin"))
+            else:
+                return redirect(url_for("index"))
         else:
             flash("Invalid username or password", "error")
             return redirect(url_for("login"))
 
     return render_template("login.html")
+
 
 @app.route("/logout")
 def logout():
@@ -145,9 +166,6 @@ def login_required(func):
 # ------------------------
 # Helper: Feature Flags from Key Vault or Env
 # ------------------------
-
-
-feature_flags_cache = {}
 
 def load_feature_flags(names: list[str], default: str = "false") -> dict[str, bool]:
     """
@@ -195,15 +213,21 @@ def index():
     return render_template(
         "index.html",
         flash_messages=formatted_messages,
-        # send_email_feature=feature_flags["SEND-EMAIL"],
-        # generate_csv_feature=feature_flags["GENERATE-CSV"],
-        # email_insight=feature_flags["EMAIL-INSIGHT"],
-        # send_msg_feature=feature_flags["SEND-MSG"],
-        send_email_feature="true",
-        generate_csv_feature="true",
-        email_insight="true",
-        send_msg_feature="true",
+        send_email_feature=feature_flags["SEND-EMAIL"],
+        generate_csv_feature=feature_flags["GENERATE-CSV"],
+        email_insight=feature_flags["EMAIL-INSIGHT"],
+        send_msg_feature=feature_flags["SEND-MSG"],
     )
+
+# ------------------------
+# Admin page
+# ------------------------
+@app.route("/admin")
+def admin():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    return render_template("admin.html")
+
 
 
 @app.route("/set-account", methods=["POST"])
@@ -221,31 +245,35 @@ def set_account():
 @app.route("/send_email", methods=["POST"])
 @login_required
 def send_email_api():
-    data = request.get_json()
-    print(f"Data received for sending email: {data}")
-    template = data.get("template_name")
-    csv_files = data.get("csv_files", [])   # ✅ accept multiple csvs
-    allow_duplicates = data.get("allow_duplicates", False)
-    account_number = data.get("smtp_account", "1")  # default to 1
+    feature_flags = load_feature_flags("SEND-EMAIL", "true")
+    if not feature_flags.get("SEND-EMAIL", False):
+        return jsonify({"success": False, "logs": ["❌ UnAuthorized: Email Sending Feature is disabled."]}), 403
+    else:
+        data = request.get_json()
+        print(f"Data received for sending email: {data}")
+        template = data.get("template_name")
+        csv_files = data.get("csv_files", [])   # ✅ accept multiple csvs
+        allow_duplicates = data.get("allow_duplicates", False)
+        account_number = data.get("smtp_account", "1")  # default to 1
 
-    print(f"Account Number Selected in send Email: {account_number}")
+        print(f"Account Number Selected in send Email: {account_number}")
 
-    try:
-        logs = run_email_sender(
-            template_name=template,
-            csv_files=csv_files,   # ✅ pass to sender
-            allow_duplicates=allow_duplicates,
-            account_number=account_number
-        )
+        try:
+            logs = run_email_sender(
+                template_name=template,
+                csv_files=csv_files,   # ✅ pass to sender
+                allow_duplicates=allow_duplicates,
+                account_number=account_number
+            )
 
-        errors = [log for log in logs if "❌" in log or "Error" in log]
-        if errors:
-            return jsonify({"success": False, "logs": logs})
-        else:
-            return jsonify({"success": True, "logs": logs})
+            errors = [log for log in logs if "❌" in log or "Error" in log]
+            if errors:
+                return jsonify({"success": False, "logs": logs})
+            else:
+                return jsonify({"success": True, "logs": logs})
 
-    except Exception as e:
-        return jsonify({"success": False, "logs": [f"Failed to send emails: {e}"]}), 500
+        except Exception as e:
+            return jsonify({"success": False, "logs": [f"Failed to send emails: {e}"]}), 500
 
 
 # ======================
@@ -293,129 +321,133 @@ def upload_file():
 @app.route("/generate_csv", methods=["POST"])
 @login_required
 def generate_csv():
-    data = request.get_json()
-    # print(f"Data received for CSV generation: {data}")
-    email_option = data.get("email_option")
-    start_date = data.get("start_date")
-    end_date = data.get("end_date")
-    account_number = data.get("smtp_account", "1")  # default to 1
-    print(f"Account Number Selected in generate csv: {account_number}")
+    feature_flags = load_feature_flags("GENERATE-CSV", "true")
+    if not feature_flags.get("GENERATE-CSV", False):
+        return jsonify({"success": False, "logs": ["❌ UnAuthorized: CSV Generation Feature is disabled."]}), 403
+    else:
+        data = request.get_json()
+        # print(f"Data received for CSV generation: {data}")
+        email_option = data.get("email_option")
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+        account_number = data.get("smtp_account", "1")  # default to 1
+        print(f"Account Number Selected in generate csv: {account_number}")
 
-    try:
-        # ✅ Check if Gmail authentication works before doing CSV
-        # service = get_gmail_service(account_number=account_number)
-
-        # ✅ If service is valid, proceed with CSV generation
         try:
-            if email_option == "date" and start_date and end_date:
-                logging.info(f"Generating CSV for emails from {start_date} to {end_date}")  
+            # ✅ Check if Gmail authentication works before doing CSV
+            # service = get_gmail_service(account_number=account_number)
 
-                try:
-                    result = subprocess.run(
-                        ["python", "gmail_to_csv.py", "date", start_date, end_date, account_number],
-                        check=True,
-                        text=True  
-                    )
-                    
-                    # Display captured output in your Flask app logs
-                    if result.stdout:
-                        logging.info(f"Subprocess stdout: {result.stdout}")
-                    if result.stderr:
-                        logging.info(f"Subprocess stderr: {result.stderr}")
-                    
-                    logging.info(f"Return code: {result.returncode}")
+            # ✅ If service is valid, proceed with CSV generation
+            try:
+                if email_option == "date" and start_date and end_date:
+                    logging.info(f"Generating CSV for emails from {start_date} to {end_date}")  
 
-                    if result.returncode == 0:
-                        # Check if no messages were found
-                        output = (result.stdout or "") + (result.stderr or "")
-                        logging.info(f"CSV generation subprocess Results: {output}")
-                        # Check if no messages were found
-                        if "No messages found" in output:
-                            return jsonify({"success": False, "message": "<b>No Emails Found!</b>"})
-
-                        elif "Gmail Account Token Expired" in output:
-                            session["pending_csv_request"] = data
-                            session.modified = True
-                            return jsonify({"token_expired": True})
-
-                        elif "No refresh_token available" in output:
-                            return jsonify({
-                                "status": "error",
-                                "message": "⚠️ No refresh token found. Please log in again."
-                            }), 401
-                        elif result.stdout and "No messages found" in result.stdout:
-                            return jsonify({"success": False, "message": f"<b>No Emails Found!</b><br>from {start_date} to {end_date}!"})
-                        else:
-                            return jsonify({"success": True, "message": f"CSV Generated for emails from {start_date} to {end_date}!"})
-                    else:
-                        logging.error(f"Subprocess failed with return code {result.returncode}")
-                        logging.error(f"Error details: {result.stderr}")
-                        return jsonify({"success": False, "message": "Failed to generate CSV"}), 500
+                    try:
+                        result = subprocess.run(
+                            ["python", "gmail_to_csv.py", "date", start_date, end_date, account_number],
+                            check=True,
+                            text=True  
+                        )
                         
-                except Exception as e:
-                    logging.error(f"Subprocess error: {e}")
-                    return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
+                        # Display captured output in your Flask app logs
+                        if result.stdout:
+                            logging.info(f"Subprocess stdout: {result.stdout}")
+                        if result.stderr:
+                            logging.info(f"Subprocess stderr: {result.stderr}")
+                        
+                        logging.info(f"Return code: {result.returncode}")
 
-            else:
-                logging.info("Generating CSV for all emails")
-                print("Starting email extraction....")
-            
-                try:
-                    result = subprocess.run(
-                        ["python", "gmail_to_csv.py", "all", account_number],
-                        check=True,
-                        capture_output=True,  # capture stdout and stderr
-                        text=True
-                    )
-                    
-                    # Display captured output in your Flask app logs
-                    if result.stdout:
-                        logging.info(f"Subprocess stdout: {result.stdout}")
-                    if result.stderr:
-                        logging.info(f"Subprocess stderr: {result.stderr}")
-                    
-                    logging.info(f"Return code: {result.returncode}")
-                    
-                    if result.returncode == 0:
-                        output = (result.stdout or "") + (result.stderr or "")
-                        logging.info(f"CSV generation subprocess Results: {output}")
-                        # Check if no messages were found
-                        if "No messages found" in output:
-                            return jsonify({"success": False, "message": "<b>No Emails Found!</b>"})
+                        if result.returncode == 0:
+                            # Check if no messages were found
+                            output = (result.stdout or "") + (result.stderr or "")
+                            logging.info(f"CSV generation subprocess Results: {output}")
+                            # Check if no messages were found
+                            if "No messages found" in output:
+                                return jsonify({"success": False, "message": "<b>No Emails Found!</b>"})
 
-                        elif "Gmail Account Token Expired" in output:
-                            session["pending_csv_request"] = data
-                            session.modified = True
-                            return jsonify({"token_expired": True})
+                            elif "Gmail Account Token Expired" in output:
+                                session["pending_csv_request"] = data
+                                session.modified = True
+                                return jsonify({"token_expired": True})
+
+                            elif "No refresh_token available" in output:
+                                return jsonify({
+                                    "status": "error",
+                                    "message": "⚠️ No refresh token found. Please log in again."
+                                }), 401
+                            elif result.stdout and "No messages found" in result.stdout:
+                                return jsonify({"success": False, "message": f"<b>No Emails Found!</b><br>from {start_date} to {end_date}!"})
+                            else:
+                                return jsonify({"success": True, "message": f"CSV Generated for emails from {start_date} to {end_date}!"})
+                        else:
+                            logging.error(f"Subprocess failed with return code {result.returncode}")
+                            logging.error(f"Error details: {result.stderr}")
+                            return jsonify({"success": False, "message": "Failed to generate CSV"}), 500
                             
-                        elif "No refresh_token available" in output:
-                            return jsonify({
-                                "status": "error",
-                                "message": "⚠️ No refresh token found. Please log in again."
-                            }), 401
+                    except Exception as e:
+                        logging.error(f"Subprocess error: {e}")
+                        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
 
-                        else:
-                            return jsonify({"success": True, "message": "CSV with all emails generated successfully!"})
-                    else:
-                        logging.error(f"Subprocess failed with return code {result.returncode}")
-                        logging.error(f"Error details: {result.stderr}")
-                        return jsonify({"success": False, "message": "Failed to generate CSV"}), 500
+                else:
+                    logging.info("Generating CSV for all emails")
+                    print("Starting email extraction....")
+                
+                    try:
+                        result = subprocess.run(
+                            ["python", "gmail_to_csv.py", "all", account_number],
+                            check=True,
+                            capture_output=True,  # capture stdout and stderr
+                            text=True
+                        )
                         
-                except Exception as e:
-                    logging.error(f"Subprocess error: {e}")
-                    return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
-        except subprocess.CalledProcessError:
-            return jsonify({"success": False, "message": "Failed to generate CSV file."}), 500
+                        # Display captured output in your Flask app logs
+                        if result.stdout:
+                            logging.info(f"Subprocess stdout: {result.stdout}")
+                        if result.stderr:
+                            logging.info(f"Subprocess stderr: {result.stderr}")
+                        
+                        logging.info(f"Return code: {result.returncode}")
+                        
+                        if result.returncode == 0:
+                            output = (result.stdout or "") + (result.stderr or "")
+                            logging.info(f"CSV generation subprocess Results: {output}")
+                            # Check if no messages were found
+                            if "No messages found" in output:
+                                return jsonify({"success": False, "message": "<b>No Emails Found!</b>"})
 
-    except RuntimeError as e:
-        # ✅ Handle missing Gmail token properly
-        if "GMAIL_TOKEN_MISSING" in str(e):
-            session["pending_csv_request"] = data
-            session.modified = True
-            print(f"Error When Token Missing: {str(e)}")
-            return jsonify({"success": False, "auth_required": True, "message": "Please authenticate Gmail first."})
-        else:
-            return jsonify({"success": False, "message": f"Error: {str(e)}"})
+                            elif "Gmail Account Token Expired" in output:
+                                session["pending_csv_request"] = data
+                                session.modified = True
+                                return jsonify({"token_expired": True})
+                                
+                            elif "No refresh_token available" in output:
+                                return jsonify({
+                                    "status": "error",
+                                    "message": "⚠️ No refresh token found. Please log in again."
+                                }), 401
+
+                            else:
+                                return jsonify({"success": True, "message": "CSV with all emails generated successfully!"})
+                        else:
+                            logging.error(f"Subprocess failed with return code {result.returncode}")
+                            logging.error(f"Error details: {result.stderr}")
+                            return jsonify({"success": False, "message": "Failed to generate CSV"}), 500
+                            
+                    except Exception as e:
+                        logging.error(f"Subprocess error: {e}")
+                        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
+            except subprocess.CalledProcessError:
+                return jsonify({"success": False, "message": "Failed to generate CSV file."}), 500
+
+        except RuntimeError as e:
+            # ✅ Handle missing Gmail token properly
+            if "GMAIL_TOKEN_MISSING" in str(e):
+                session["pending_csv_request"] = data
+                session.modified = True
+                print(f"Error When Token Missing: {str(e)}")
+                return jsonify({"success": False, "auth_required": True, "message": "Please authenticate Gmail first."})
+            else:
+                return jsonify({"success": False, "message": f"Error: {str(e)}"})
 
 
 # ======================
@@ -685,18 +717,130 @@ def gmail_oauth2callback():
 
 @app.route("/send_whatsapp", methods=["POST"])
 def send_whatsapp():
-    # Example: just send a test message
-    phone_number = request.form.get("phone_number")  # Get number from form (or hardcode)
-    message_type = request.form.get("message_type", "template")
-
-    if message_type == "template":
-        send_template_message(phone_number)
-    elif message_type == "freeform":
-        send_freeform_message(phone_number, "Hello 👋 from Flask!")
+    feature_flags = load_feature_flags("SEND-MSG", "true")
+    if not feature_flags.get("SEND-MSG", False):
+        return jsonify({"success": False, "logs": ["❌ UnAuthorized: WhatsApp Messaging Feature is disabled."]}), 403
     else:
-        send_custom_template(phone_number, "Shahryar")
+        # Example: just send a test message
+        phone_number = request.form.get("phone_number")  # Get number from form (or hardcode)
+        message_type = request.form.get("message_type", "template")
 
-    return redirect(url_for("index"))
+        if message_type == "template":
+            send_template_message(phone_number)
+        elif message_type == "freeform":
+            send_freeform_message(phone_number, "Hello 👋 from Flask!")
+        else:
+            send_custom_template(phone_number, "Shahryar")
+
+        return redirect(url_for("index"))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory of app.py
+MAPPING_FILE = os.path.join(BASE_DIR, "static", "mapping", "mapped.json")
+def load_app_keyvault_map(file_path=MAPPING_FILE):
+    if not os.path.exists(file_path):
+        print(f"Mapping file {file_path} not found.")
+        return {}
+
+    with open(file_path, "r") as f:
+        return json.load(f)
+
+def fetch_app_flags(app_name, kv_name):
+    """Fetch feature flags from a specific Key Vault for a given app."""
+    feature_flags = {}
+    if not kv_name:
+        print(f"No Key Vault mapped for app {app_name}")
+        return {"app_name": app_name, "features": feature_flags}
+
+    kv_url = f"https://{kv_name}.vault.azure.net"
+    print(f"Fetching secrets from Key Vault: {kv_url}")
+    try:
+        kv_client = SecretClient(vault_url=kv_url, credential=credential)
+
+        for flag in FLAG_NAMES:
+            try:
+                secret = kv_client.get_secret(flag)
+                feature_flags[flag] = secret.value.lower() == "true"
+                print(f"{app_name}: {flag} = {secret.value}")
+            except Exception as e:
+                print(f"{app_name}: Failed to fetch {flag} - {e}")
+                feature_flags[flag] = False
+    except Exception as e:
+        print(f"Failed to connect to Key Vault {kv_url}: {e}")
+
+    return {"app_name": app_name, "features": feature_flags}
+
+
+@app.route("/api/app-services", methods=["GET"])
+def get_app_services():
+    global cache_data, cache_time
+    now = time.time()
+
+    if cache_data and (now - cache_time < CACHE_TTL):
+        return jsonify({"services": cache_data, "logs": ["Returning cached data"]})
+
+    print("Fetching list of app services from Azure...")
+    web_client = WebSiteManagementClient(credential, SUBSCRIPTION_ID)
+
+    try:
+        webapps = list(web_client.web_apps.list())
+    except Exception as e:
+        return jsonify({"services": [], "logs": [f"Failed to fetch app services: {e}"]}), 500
+
+    # 🚀 build dynamic mapping
+    APP_KEYVAULT_MAP = load_app_keyvault_map()
+
+    services_data = []
+    futures = []
+
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        for webapp in webapps:
+            app_name = webapp.name
+            kv_name = APP_KEYVAULT_MAP.get(app_name)
+            futures.append(executor.submit(fetch_app_flags, app_name, kv_name))
+
+        for future in as_completed(futures):
+            services_data.append(future.result())
+
+    cache_data = services_data
+    cache_time = now
+    return jsonify({"services": services_data, "logs": ["Returning fresh services data"]})
+
+
+@app.route("/api/update-flags", methods=["POST"])
+def update_flags():
+    global cache_data, cache_time
+
+    data = request.json
+    app_name = data.get("app_name")
+    features = data.get("features")
+
+    if not app_name or not features:
+        return jsonify({"error": "Invalid payload"}), 400
+
+    # 🚀 dynamically rebuild mapping
+    APP_KEYVAULT_MAP = load_app_keyvault_map()
+
+    kv_name = APP_KEYVAULT_MAP.get(app_name)
+    if not kv_name:
+        return jsonify({"error": f"No Key Vault mapped for {app_name}"}), 400
+
+    kv_url = f"https://{kv_name}.vault.azure.net"
+    kv_client = SecretClient(vault_url=kv_url, credential=credential)
+
+    updated = {}
+    for flag, value in features.items():
+        try:
+            kv_client.set_secret(flag, "true" if value else "false")
+            updated[flag] = value
+        except Exception as e:
+            updated[flag] = f"error: {str(e)}"
+
+    cache_data = None
+    cache_time = 0
+
+    return jsonify({
+        "app_name": app_name,
+        "updated": updated
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -8,3 +8,4 @@ gunicorn
 azure-identity 
 azure-keyvault-secrets
 azure-storage-blob
+azure-mgmt-web
