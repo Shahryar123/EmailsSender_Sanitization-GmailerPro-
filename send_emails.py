@@ -110,14 +110,14 @@ def run_email_sender(template_name, csv_files=None, allow_duplicates=False, acco
                 success = send_email_hostinger(
                     cpanel_user,
                     email,
-                    f"Welcome to IQTechSolutions, {name}",
+                    f"Welcome to Mail Fusion, {name}",
                     personalized_html
                 )
             else:
                 success = send_email_smtp(
                     SMTP_USER,
                     email,
-                    f"Welcome to IQTechSolutions, {name}",
+                    f"Welcome to Mail Fusion, {name}",
                     personalized_html
                 )
 
