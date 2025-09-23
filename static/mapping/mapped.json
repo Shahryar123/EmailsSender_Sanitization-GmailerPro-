@@ -1,4 +1,6 @@
 {
   "EmailAutomationIQTech": "akv-test-ca",
-  "client1-prod-app": "client1-prod-akv"
+  "client1-prod-app": "client1-prod-akv",
+  "InstruBiz": "InstruBiz-akv"
+
 }
