@@ -120,13 +120,13 @@ h1 {
     background: #fff;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 6px 6px 0px #000; /* bold shadow like in screenshot */
+    box-shadow: 6px 6px 0px #b9b5b5; /* bold shadow like in screenshot */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card.generate:hover {
     transform: translateY(-5px); /* lift on hover */
-    box-shadow: 10px 10px 0px #000; /* stronger shadow */
+    box-shadow: 10px 10px 0px #174958; /* stronger shadow */
 }
 
 .card.generate h3 {
@@ -149,13 +149,13 @@ h1 {
     background: #fff;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 6px 6px 0px #000; /* bold shadow like in screenshot */
+    box-shadow: 6px 6px 0px #b9b5b5; /* bold shadow like in screenshot */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card.send:hover {
     transform: translateY(-5px); /* lift on hover */
-    box-shadow: 10px 10px 0px #000; /* stronger shadow */
+    box-shadow: 10px 10px 0px #174958; /* stronger shadow */
 }
 
 .card.send h3 {
@@ -177,13 +177,13 @@ h1 {
     background: #fff;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 6px 6px 0px #000; /* bold shadow like in screenshot */
+    box-shadow: 6px 6px 0px #b9b5b5; /* bold shadow like in screenshot */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card.send-msg:hover {
     transform: translateY(-5px); /* lift on hover */
-    box-shadow: 10px 10px 0px #000; /* stronger shadow */
+    box-shadow: 10px 10px 0px #174958; /* stronger shadow */
 }
 
 .card.send-msg h3 {
@@ -775,6 +775,21 @@ svg.icon {
     width: 60px;
     height: 3px;
     background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border-radius: 2px;
+}
+.linebelow {
+    position: relative; /* Needed so ::after attaches to this element */
+}
+
+.linebelow::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 3px;
+    background: #f96d00;
     border-radius: 2px;
 }
 

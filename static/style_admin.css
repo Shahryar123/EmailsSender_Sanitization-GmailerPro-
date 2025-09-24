@@ -18,6 +18,27 @@ body {
     color: var(--primary-color);
 }
 
+/* NAVBAR TITLE  */
+.navbar-heading-minimal {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    position: relative;
+    display: inline-block;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.navbar-heading-minimal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -10px;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #ec4899, #f97316);
+    border-radius: 2px;
+}
 .main-container {
     max-width: 1200px;
     margin: 2rem auto;
@@ -268,4 +289,5 @@ input:checked + .toggle-slider:before {
     input:checked + .toggle-slider:before {
         transform: translateX(20px);
     }
+    
 }

@@ -18,7 +18,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(to right, #710037, #574c71, #143061);
+      /* background: linear-gradient(to right, #710037, #574c71, #143061); */
+      background: #f2f2f2;
     }
 
     .container {
@@ -36,10 +37,12 @@
     .left {
       padding: 40px;
       color: white;
-      background: linear-gradient(to bottom, rgb(6 6 6 / 50%), #945474);
+      background: linear-gradient(to bottom, rgba(17, 24, 39, 0.6), rgba(31, 41, 55, 0.5));
       display: flex;
       flex-direction: column;
       justify-content: center;
+      border-right: 2px solid black; /* separator line */
+
     }
 
     .left h2 {
@@ -79,7 +82,7 @@
     }
 
     .left .options a {
-      color: #f9a8d4;
+      color: white;
       text-decoration: none;
     }
 
@@ -90,7 +93,7 @@
       border: none;
       font-weight: bold;
       cursor: pointer;
-      background: linear-gradient(to right, #ec4899, #f97316);
+      background: linear-gradient(to right, #f96d00, #f97316);
       color: white;
       margin-bottom: 20px;
     }
@@ -309,7 +312,7 @@
 
     .register-form .back-to-login {
       text-align: center;
-      color: #f9a8d4;
+      color: white;
       text-decoration: none;
       cursor: pointer;
     }
@@ -367,6 +370,8 @@
         padding: 10px 40px 10px 12px;
       }
     }
+
+
   </style>
 </head>
 <body>
@@ -375,7 +380,8 @@
     
     <!-- Left Section -->
     <div class="left">
-      <h2>Welcome back &#128075;</h2>
+      <!-- <h2>Welcome back &#128075;</h2> -->
+      <h2>Welcome back</h2>
       <p>Please Enter your Account details</p>
             
         <form method="POST" action="/login">
@@ -385,7 +391,7 @@
             <label>Password</label>
             <div class="password-wrapper">
                 <input type="password" name="password" id="password" placeholder="••••••••" required>
-                <span class="toggle-password" onclick="togglePassword()" id="toggleIcon">🙈</span>
+                <span class="toggle-password" onclick="togglePassword()" id="toggleIcon">👁️</span>
             </div>
 
             <div class="options">
@@ -395,7 +401,7 @@
 
             <!-- Use type="submit" so it POSTs to Flask -->
             <button type="submit" class="signin">Sign in</button>
-            <p style="text-align: center;">Don't have an account? <a href="#" onclick="showRegisterForm()" style="color: #f9a8d4;">Sign Up</a></p>
+            <p style="text-align: center;">Don't have an account? <a href="#" onclick="showRegisterForm()" style="color: white;">Sign Up</a></p>
         </form>
     </div>
 
@@ -404,22 +410,23 @@
       <!-- Original testimonial content -->
       <div class="testimonial-content" id="testimonialContent">
         <div class="testimonial">
-          <h1>Mail Fusion.</h1></br>
-          <p class="quote">
+          <h1>MailFusion.</h1>
+          <!-- <p class="quote">
             "Seamlessly extract emails from Gmail, generate CSV files, and send personalized email templates to users."
-          </p>
-          </br></br></br></br></br></br></br></br>
+          </p> -->
+          <!-- </br></br></br></br></br></br></br></br> -->
         </div>
 
         <div class="card">
           <h3>🔏 Secure access to your dashboard</h3>
-          <p>Be among the first users to experience the easiest way to start marketing using Mail Fusion.</p>
+          <p>Be among the first users to experience the easiest way to start marketing using MailFusion.</p>
         </div>
       </div>
 
       <!-- Registration form (hidden by default) -->
       <div class="register-form" id="registerForm">
-        <h2>Create Account ✨</h2>
+        <!-- <h2>Create Account ✨</h2> -->
+        <h2>Create Account</h2>
         <p>Join us and start your email automation journey</p>
         
         <form method="POST" action="/register">
@@ -432,7 +439,7 @@
           <label>Password</label>
           <div class="password-wrapper">
             <input type="password" name="password" id="registerPassword" placeholder="••••••••" required>
-            <span class="toggle-password" onclick="toggleRegisterPassword()" id="registerToggleIcon">🙈</span>
+            <span class="toggle-password" onclick="toggleRegisterPassword()" id="registerToggleIcon">👁️</span>
           </div>
 
           <button type="submit">Create Account</button>
@@ -441,7 +448,7 @@
       </div>
       <!-- Forgot Password form (hidden by default) -->
       <div class="register-form" id="forgotForm">
-        <h2>Reset Password 🔒</h2>
+        <h2>Reset Password </h2>
         <p>Enter your username and set a new password</p>
         
         <form method="POST" action="/forgot-password">
@@ -451,7 +458,7 @@
           <label>New Password</label>
           <div class="password-wrapper">
             <input type="password" name="newpassword" id="forgotPassword" placeholder="••••••••" required>
-            <span class="toggle-password" onclick="toggleForgotPassword()" id="forgotToggleIcon">🙈</span>
+            <span class="toggle-password" onclick="toggleForgotPassword()" id="forgotToggleIcon">👁️</span>
           </div>
 
           <button type="submit">Update Password</button>
@@ -473,7 +480,7 @@
         toggleIcon.textContent = "👁️";
       } else {
         passwordInput.type = "password";
-        toggleIcon.textContent = "🙈";
+        toggleIcon.textContent = "👁️";
       }
     }
 
@@ -486,7 +493,7 @@
         toggleIcon.textContent = "👁️";
       } else {
         passwordInput.type = "password";
-        toggleIcon.textContent = "🙈";
+        toggleIcon.textContent = "👁️";
       }
     }
 
@@ -622,7 +629,7 @@
     toggleIcon.textContent = "👁️";
   } else {
     passwordInput.type = "password";
-    toggleIcon.textContent = "🙈";
+    toggleIcon.textContent = "👁️";
   }
 }
 

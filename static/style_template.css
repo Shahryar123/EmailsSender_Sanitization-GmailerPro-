@@ -87,5 +87,5 @@ h1 {
     transform: scale(1.05);
     box-shadow: 0 0 8px rgba(13, 110, 253, 0.6);
     color: white;
-    background: linear-gradient(135deg, #4a90e2 0%, #8e44ad 100%);
+    background: #FF7D1C;
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mail Fusion</title>
+    <title>MailFusion</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
@@ -13,16 +13,16 @@
 <body>
     <!-- Navbar -->
     <nav style="background: linear-gradient(to right, #0f2d36, #174958, #174958); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; color: white;">
-    <!-- Left Side -->
-    <div class="navbar-heading-minimal">Mail Fusion</div>
+        <!-- Left Side -->
+        <div class="navbar-heading-minimal">MailFusion</div>
 
-    <!-- Right Side Dropdown -->
-    <div style="position: relative;">
-        <span onclick="toggleDropdown()" style="cursor: pointer; font-size: 25px;">⛔</span>
-        <div id="dropdownMenu" style="display: none; position: absolute; right: 0; background: white; color: black; border-radius: 15px; box-shadow: 0 14px 16px rgba(0,0,0,0.1); margin-top: 8px; min-width: 220px; text-align: left; z-index: 100;">
-        <a href="/logout" style="display: block; padding: 10px; text-decoration: none; color: black;">🚫 Sign Out</a>
+        <!-- Right Side Dropdown -->
+        <div style="position: relative;">
+            <span onclick="toggleDropdown()" style="cursor: pointer; font-size: 15px;">Sign Out</span>
+            <div id="dropdownMenu" style="display: none; position: absolute; right: 0; background: white; color: black; border-radius: 15px; box-shadow: 0 14px 16px rgba(0,0,0,0.1); margin-top: 8px; min-width: 220px; text-align: left; z-index: 100;">
+            <a href="/logout" style="display: block; padding: 10px; text-decoration: none; color: black;">🚫 Sign Out</a>
+            </div>
         </div>
-    </div>
     </nav>
     <div class="container">
         <!-- Center circle icon above the title -->
@@ -33,7 +33,7 @@
             </svg>
         </div>
 
-        <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">Mail Fusion</h1>
+        <h1 class="linebelow text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">MailFusion</h1>
         <p class="subtitle">Streamline your email campaigns with our advanced automation platform. Generate targeted lists and send beautiful emails effortlessly.</p>
 
         <!-- <div class="card">
@@ -445,7 +445,7 @@
                 </form> -->
                 <form action="{{ url_for('send_whatsapp') }}" method="post" class="mb-0">
                     <label for="phone_number" class="form-label">Enter Phone Number (with country code)</label>
-                    <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="923041234567" required>
+                    <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="WhatsApp Number" required>
 
                     <input type="hidden" name="message_type" value="template">
 
@@ -506,7 +506,7 @@
                     </form> -->
                     <form action="{{ url_for('send_whatsapp') }}" method="post" class="mb-0">
                         <label for="phone_number" class="form-label">Enter Phone Number (with country code)</label>
-                        <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="923041234567" required>
+                        <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="WhatsApp Number" required>
 
                         <input type="hidden" name="message_type" value="template">
 
@@ -641,61 +641,60 @@
     <div id="successMessage" class="success-message">
         ✅ Records loaded successfully!
     </div>
-</div>
 
-<!-- Preview Modal -->
-<div class="modal fade" id="templatePreviewModal" tabindex="-1" aria-labelledby="templatePreviewLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="templatePreviewLabel">Template Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" style="padding:0;">
-        <iframe id="templatePreviewFrame" style="width:100%; height:80vh; border:none;"></iframe>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal for CSV Selection -->
-<div class="modal fade" id="csvModal" tabindex="-1" aria-labelledby="csvModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <!-- Preview Modal -->
+    <div class="modal fade" id="templatePreviewModal" tabindex="-1" aria-labelledby="templatePreviewLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="csvModalLabel">
-                    <i class="fas fa-file-csv"></i> Select CSV Files
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <input type="text" class="csv-search-input w-100" placeholder="🔍 Search CSV files..." id="csvSearch">
+        <div class="modal-header">
+            <h5 class="modal-title" id="templatePreviewLabel">Template Preview</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" style="padding:0;">
+            <iframe id="templatePreviewFrame" style="width:100%; height:80vh; border:none;"></iframe>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal for CSV Selection -->
+    <div class="modal fade" id="csvModal" tabindex="-1" aria-labelledby="csvModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="csvModalLabel">
+                        <i class="fas fa-file-csv"></i> Select CSV Files
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="mb-3">
-                    <button class="btn btn-outline-primary btn-sm" id="selectAll">
-                        <i class="fas fa-check-double"></i> Select All
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input type="text" class="csv-search-input w-100" placeholder="🔍 Search CSV files..." id="csvSearch">
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-outline-primary btn-sm" id="selectAll">
+                            <i class="fas fa-check-double"></i> Select All
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm ms-2" id="clearAll">
+                            <i class="fas fa-times"></i> Clear All
+                        </button>
+                        <span class="ms-3 text-muted" id="modalCounter">0 files selected</span>
+                    </div>
+                    <div class="modal-file-list" style="max-height: 400px; overflow-y: auto;" id="csvFileList">
+                        <!-- CSV files will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button> -->
+                    <button type="button" class="btn" style="background-color: #f96d00; color: white;" data-bs-dismiss="modal" id="confirmSelection">
+                        <i class="fas fa-check"></i> Confirm Selection (<span id="confirmCounter">0</span>)
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm ms-2" id="clearAll">
-                        <i class="fas fa-times"></i> Clear All
-                    </button>
-                    <span class="ms-3 text-muted" id="modalCounter">0 files selected</span>
                 </div>
-                <div class="modal-file-list" style="max-height: 400px; overflow-y: auto;" id="csvFileList">
-                    <!-- CSV files will be loaded here -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i> Cancel
-                </button> -->
-                <button type="button" class="btn" style="background-color: #f96d00; color: white;" data-bs-dismiss="modal" id="confirmSelection">
-                    <i class="fas fa-check"></i> Confirm Selection (<span id="confirmCounter">0</span>)
-                </button>
             </div>
         </div>
     </div>
-</div>
 <!-- SweetAlert2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -1788,5 +1787,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
     </script>
+
+    <!-- Footer -->
+    <footer style="background: linear-gradient(to right, #0f2d36, #174958, #174958); color: white; padding: 20px 40px; text-align: center; margin-top: 40px;">
+    <p style="margin: 0; font-size: 20px;"><b>
+        &copy; 2025 MailFusion. All rights reserved.
+    </b></p>
+    <!-- <p style="margin: 5px 0 0; font-size: 13px;">
+        <a href="/privacy" style="color: #fca765; text-decoration: none; margin: 0 10px;">Privacy Policy</a> | 
+        <a href="/terms" style="color: #fca765; text-decoration: none; margin: 0 10px;">Terms of Service</a> | 
+        <a href="/contact" style="color: #fca765; text-decoration: none; margin: 0 10px;">Contact</a>
+    </p> -->
+    </footer>
+
 </body>
 </html>

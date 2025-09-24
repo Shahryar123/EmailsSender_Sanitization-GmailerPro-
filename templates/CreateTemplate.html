@@ -18,18 +18,18 @@
     <!-- Back to Main Page (left-aligned inside flex) -->
     <div style="font-size: 20px; font-weight: bold;">
         <a href="{{ url_for('index') }}" 
-            style=" left: 20px; text-decoration: none;  font-weight: bold; font-size: 1.3rem;color: white;">
-            👈 Back to Home
+            style=" left: 20px; text-decoration: none;  font-weight: bold; font-size: 15px;color: white;">
+            Back to Home
         </a>
     </div>
 
     <!-- Right Side Dropdown -->
-    <div style="position: relative;">
-        <span onclick="toggleDropdown()" style="cursor: pointer; font-size: 25px;">⛔</span>
-        <div id="dropdownMenu" style="display: none; position: absolute; right: 0; background: white; color: black; border-radius: 15px; box-shadow: 0 14px 16px rgba(0,0,0,0.1); margin-top: 8px; min-width: 220px; text-align: left; z-index: 100;">
-        <a href="/logout" style="display: block; padding: 10px; text-decoration: none; color: black;">🚫 Sign Out</a>
+     <div style="position: relative;">
+            <span onclick="toggleDropdown()" style="cursor: pointer; font-size: 15px;">Sign Out</span>
+            <div id="dropdownMenu" style="display: none; position: absolute; right: 0; background: white; color: black; border-radius: 15px; box-shadow: 0 14px 16px rgba(0,0,0,0.1); margin-top: 8px; min-width: 220px; text-align: left; z-index: 100;">
+            <a href="/logout" style="display: block; padding: 10px; text-decoration: none; color: black;">🚫 Sign Out</a>
+            </div>
         </div>
-    </div>
     </nav>
 <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; margin-top: 20px;">    
     <!-- Centered Title -->
@@ -371,5 +371,16 @@
         }
     });
 </script>
+<!-- Footer -->
+    <footer style="background: linear-gradient(to right, #0f2d36, #174958, #174958); color: white; padding: 20px 40px; text-align: center; margin-top: 40px;">
+    <p style="margin: 0; font-size: 20px;"><b>
+        &copy; 2025 MailFusion. All rights reserved.
+    </b></p>
+    <!-- <p style="margin: 5px 0 0; font-size: 13px;">
+        <a href="/privacy" style="color: #fca765; text-decoration: none; margin: 0 10px;">Privacy Policy</a> | 
+        <a href="/terms" style="color: #fca765; text-decoration: none; margin: 0 10px;">Terms of Service</a> | 
+        <a href="/contact" style="color: #fca765; text-decoration: none; margin: 0 10px;">Contact</a>
+    </p> -->
+    </footer>
 </body>
 </html>
