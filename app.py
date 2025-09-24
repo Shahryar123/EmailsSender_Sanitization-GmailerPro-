@@ -173,7 +173,6 @@ def load_feature_flags(names: list[str], default: str = "false") -> dict[str, bo
     First try Key Vault, fallback to env, otherwise use default.
     Returns dict {flag_name: bool}
     """
-    
     credential = DefaultAzureCredential()
     kv_client = SecretClient(vault_url=KEY_VAULT_URL, credential=credential)
     flags = {}
@@ -245,8 +244,9 @@ def set_account():
 @app.route("/send_email", methods=["POST"])
 @login_required
 def send_email_api():
-    feature_flags = load_feature_flags("SEND-EMAIL", "true")
+    feature_flags = load_feature_flags(["SEND-EMAIL"], "true")
     if not feature_flags.get("SEND-EMAIL", False):
+        print("SEND-EMAIL Feature Flag is disabled.")
         return jsonify({"success": False, "logs": ["❌ UnAuthorized: Email Sending Feature is disabled."]}), 403
     else:
         data = request.get_json()
@@ -321,7 +321,7 @@ def upload_file():
 @app.route("/generate_csv", methods=["POST"])
 @login_required
 def generate_csv():
-    feature_flags = load_feature_flags("GENERATE-CSV", "true")
+    feature_flags = load_feature_flags(["GENERATE-CSV"], "true")
     if not feature_flags.get("GENERATE-CSV", False):
         return jsonify({"success": False, "logs": ["❌ UnAuthorized: CSV Generation Feature is disabled."]}), 403
     else:
@@ -717,7 +717,7 @@ def gmail_oauth2callback():
 
 @app.route("/send_whatsapp", methods=["POST"])
 def send_whatsapp():
-    feature_flags = load_feature_flags("SEND-MSG", "true")
+    feature_flags = load_feature_flags(["SEND-MSG"], "true")
     if not feature_flags.get("SEND-MSG", False):
         return jsonify({"success": False, "logs": ["❌ UnAuthorized: WhatsApp Messaging Feature is disabled."]}), 403
     else:
